@@ -511,7 +511,7 @@ html, body, #root { height: 100%; }
 /* The reading lamp, fixed to the room so it does not scroll. Two gradients
    and a vignette turn a flat field into a lit room. */
 .shell::before {
-  content: ''; position: fixed; inset: 0; z-index: 3; pointer-events: none;
+  content: ''; position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none;
   background:
     radial-gradient(940px 640px at 20% -12%,
       color-mix(in oklab, var(--gilt) var(--lamp), transparent) 0%,
@@ -539,7 +539,7 @@ input::placeholder { color: var(--text-faint); }
    The app had no top chrome and two boxes whose literal text was `logo`. This
    is the head of the bookcase and the running head of the volume at once. */
 .head {
-  grid-area: head; position: relative; z-index: 6; display: grid;
+  grid-area: head; position: relative; z-index: var(--z-head); display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center; gap: var(--s-5); padding: 0 var(--s-5) 0 var(--s-5);
   background-image:
@@ -624,7 +624,7 @@ input::placeholder { color: var(--text-faint); }
    shelf — identical rounded rectangles, no covers, one 4px hairline of wood —
    had none of it. */
 .case {
-  grid-area: case; position: relative; z-index: 4; display: flex;
+  grid-area: case; position: relative; z-index: var(--z-case); display: flex;
   flex-direction: column; min-height: 0;
   background-image:
     linear-gradient(90deg, var(--case-lip) 0 7px, var(--case) 7px calc(100% - 7px),
@@ -757,7 +757,7 @@ input::placeholder { color: var(--text-faint); }
    band — answering four complaints of "too red" by making the app beige is a
    different failure, not a success. */
 .title-board {
-  position: relative; z-index: 1; display: grid;
+  position: relative; z-index: var(--z-page); display: grid;
   grid-template-columns: auto minmax(0, 1fr); gap: var(--s-5);
   align-items: start; padding: var(--s-5);
   border-radius: 1px var(--r-md) var(--r-md) 1px;
@@ -885,7 +885,7 @@ input::placeholder { color: var(--text-faint); }
 }
 /* the gutter shadow: the hardest line in an open book */
 .leaf::after { content: ''; position: absolute; inset: 0 auto 0 0; width: 26px;
-  z-index: 2; pointer-events: none;
+  z-index: var(--z-ribbon); pointer-events: none;
   background-image: linear-gradient(90deg,
     color-mix(in oklab, var(--void) 34%, transparent) 0%,
     color-mix(in oklab, var(--paper-shade) 12%, transparent) 46%, transparent 100%); }
@@ -1092,7 +1092,7 @@ input::placeholder { color: var(--text-faint); }
 /* ---------- 9. SIGN-IN: the borrower's catalogue card ----------
    Replaces the flat wine modal and the dashed box whose literal text was
    `logo`. Makes ivory the dominant colour of the first screen anyone sees. */
-.scrim { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+.scrim { position: fixed; inset: 0; z-index: var(--z-modal); display: grid; place-items: center;
   padding: var(--pad);
   background-image:
     radial-gradient(900px 640px at 20% -10%, color-mix(in oklab, var(--gilt) 7%, transparent), transparent 66%),
@@ -1133,7 +1133,7 @@ input::placeholder { color: var(--text-faint); }
 /* ---------- 10. THE LISTENING VIEW: lamp out ----------
    The payoff screen goes almost black. The only chroma is the gilt on the
    board and the azure of the scrubber. */
-.folio-view { position: fixed; inset: var(--head-h) 0 0 var(--case-w); z-index: 60;
+.folio-view { position: fixed; inset: var(--head-h) 0 0 var(--case-w); z-index: var(--z-screen);
   display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden;
   border-left: 1px solid var(--void);
   background-image:
@@ -1352,7 +1352,7 @@ input::placeholder { color: var(--text-faint); }
    Statistics — its own screen, over everything, with its own tabs.
    ========================================================================== */
 .stats-screen {
-  position: fixed; inset: 0; z-index: 60;
+  position: fixed; inset: 0; z-index: var(--z-screen);
   display: grid; grid-template-rows: auto minmax(0, 1fr);
   background:
     radial-gradient(1100px 700px at 18% -8%, color-mix(in oklab, var(--gilt) 5%, transparent), transparent 62%),

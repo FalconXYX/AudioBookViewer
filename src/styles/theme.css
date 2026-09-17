@@ -142,6 +142,18 @@
 
   /* 13. GEOMETRY ---------------------------------------------------------- */
   --case-w:21rem;--head-h:4.75rem;--apparatus-w:17rem;--measure:34rem;
+
+  /* 1b. THE STACK. Every layer in the app, in one place and in order, because
+     a modal at 50 underneath a full-screen view at 60 is invisible except for
+     the strip the view does not cover — which is exactly how it failed. A new
+     surface picks a token here; it does not invent a number. */
+  --z-page:1;        /* the desk and anything flowing on it        */
+  --z-ribbon:2;      /* ornament pinned over page content          */
+  --z-grain:3;       /* the room overlay, never interactive        */
+  --z-case:4;        /* the sidebar                                */
+  --z-head:6;        /* the running head, above the sidebar        */
+  --z-screen:60;     /* full-window destinations: listening, stats */
+  --z-modal:80;      /* dialogs. Always above every screen.        */
   --plank-h:11px;--ribbon-w:13px;--tag-h:13px;
   --s-1:0.25rem;--s-2:0.5rem;--s-3:0.75rem;--s-4:1rem;
   --s-5:1.5rem;--s-6:2rem;--s-7:3rem;--s-8:4rem;
