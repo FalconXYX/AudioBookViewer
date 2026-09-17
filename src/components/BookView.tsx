@@ -9,7 +9,7 @@ import { useDocumentIcon } from '@/hooks/useDocumentIcon'
 import { usePlayer } from '@/hooks/usePlayer'
 import { useProgress } from '@/hooks/useProgress'
 import { formatDurationLong, formatTime } from '@/lib/format'
-import { SOURCE_LABEL, stampDate } from '@/lib/paratext'
+import { stampDate } from '@/lib/paratext'
 import { Apparatus } from './Apparatus'
 import { BookButton } from './BookButton'
 import { ChapterList } from './ChapterList'
@@ -133,7 +133,6 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
                 <div className="plate__accession">
                   {added && <span>Added <b>{added}</b></span>}
                   <span>{chapters.length} files</span>
-                  <span>{SOURCE_LABEL[book.source_kind] ?? book.source_kind}</span>
                   <span>{book.folder_label}</span>
                 </div>
               </div>
@@ -154,7 +153,7 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
                 <span className="num">{Math.round(pct)}% · {formatDurationLong(book.secondsRemaining)} left</span>
               </div>
 
-              <BookButton variant="primary" disabled={!ready} onClick={() => startListening()}>
+              <BookButton variant="primary" openLabel="Opening the book…" disabled={!ready} onClick={() => startListening()}>
                 {started ? 'Resume listening' : 'Start listening'}
               </BookButton>
             </div>
@@ -164,7 +163,6 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
             <ChapterList
               chapters={chapters}
               currentIdx={player.chapterIdx}
-              bookTitle={book.title}
               fraction={book.fractionComplete}
               markedIdx={markedIdx}
               onSelect={(idx) => startListening(idx)}
@@ -180,7 +178,6 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
           </div>
 
           <p className="colophon">
-            {chapters.length} files · {formatDurationLong(book.total_duration_sec)} · {book.folder_label}<br />
             <BookButton
               variant="pamphlet"
               size="sm"

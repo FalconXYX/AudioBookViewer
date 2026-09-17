@@ -26,7 +26,7 @@ export function SourceGate({ source, folderLabel }: Props) {
             This device knows where <strong>{folderLabel}</strong> is, but the browser needs
             you to allow access again.
           </p>
-          <BookButton onClick={() => void source.reconnect()}>
+          <BookButton openLabel="Reconnecting…" onClick={() => void source.reconnect()}>
             Reconnect folder
           </BookButton>
         </>
@@ -38,7 +38,7 @@ export function SourceGate({ source, folderLabel }: Props) {
             Not set up on {getDeviceLabel()} yet. Point it at the <strong>{folderLabel}</strong>{' '}
             folder — once per device.
           </p>
-          <BookButton onClick={() => void source.attachFolder()}>
+          <BookButton openLabel="Opening folder…" onClick={() => void source.attachFolder()}>
             Choose folder
           </BookButton>
         </>
@@ -47,7 +47,7 @@ export function SourceGate({ source, folderLabel }: Props) {
       {source.status === 'error' && (
         <>
           <p role="alert">{source.error}</p>
-          <BookButton onClick={() => void source.attachFolder()}>
+          <BookButton openLabel="Opening folder…" onClick={() => void source.attachFolder()}>
             Choose folder
           </BookButton>
         </>

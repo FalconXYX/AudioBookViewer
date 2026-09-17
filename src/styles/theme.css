@@ -25,9 +25,12 @@
   /* 1. THE THREE BLACKS. A supplement, not the mechanism — a 1-point
      luminance spread cannot carry the anti-monochrome argument on its own.
      The mechanism is area (sections 2, 3, 5). ----------------------------- */
-  --air:var(--wine-950);          /* the room's air — the main field       */
+  --air:var(--wine-900);          /* the room's air — the main field       */
   --shadow:var(--steel-950);      /* EVERY cast shadow. Never neutral.     */
-  --void:var(--teal-950);         /* every slot, groove, recess, gutter    */
+  /* Was teal-950. A green-black used for every groove, gutter and recess in
+     the app tinted the whole room green — it is what read as "the background
+     colour sucks". The three-blacks idea survives; the green does not. */
+  --void:var(--wine-950);         /* every slot, groove, recess, gutter    */
 
   /* 2. THE ROOM AND THE CASE --------------------------------------------- */
   --field:var(--air);--field-warm:var(--wine-900);
@@ -99,14 +102,14 @@
      Shelf.tsx: BINDING_COUNT must equal --binding-count. ----------------- */
   --binding-count:9;
   --binding-1:var(--wine-chosen); /* wine cloth      L 3.4%  */
-  --binding-2:var(--steel-700);   /* blue buckram    L 7.6%  */
+  --binding-2:var(--steel-800);   /* blue buckram    L 4.1%  */
   --binding-3:var(--wine-800);    /* oxblood         L 2.4%  */
-  --binding-4:var(--gold-700);    /* tan calf        L 14.7% */
-  --binding-5:var(--azure-800);   /* navy morocco    L 4.3%  */
+  --binding-4:var(--gold-800);    /* tan calf        L 6.8%  */
+  --binding-5:var(--azure-900);   /* navy morocco    L 1.9%  */
   --binding-6:var(--teal-900);    /* green cloth     L 2.6%  */
   --binding-7:var(--wine-700);    /* crimson cloth   L 5.3%  */
   --binding-8:var(--steel-900);   /* black cloth     L 1.0%  */
-  --binding-9:var(--gold-800);    /* russet leather  L 6.3%  */
+  --binding-9:var(--gold-900);    /* russet leather  L 2.4%  */
 
   /* 11. THE BOOK BUTTON. Five cloth steps per variant so the press darkens
      the board by moving its gradient stops one stop, never by fading an

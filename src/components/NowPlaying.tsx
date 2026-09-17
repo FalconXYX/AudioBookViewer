@@ -18,9 +18,11 @@ interface Props {
 export function NowPlaying({ book, player, chapterCount, onExit, onRibbon }: Props) {
   return (
     <div className="folio-view">
+      {/* The shelf stays visible to the left, so the way back belongs on the
+          right — the opposite side from the navigation you already have. */}
       <div className="folio-view__top">
-        <BookButton variant="pamphlet" size="sm" onClick={onExit}>← Back to the book</BookButton>
         <span className="folio">{player.chapterIdx + 1} / {chapterCount}</span>
+        <BookButton variant="pamphlet" size="sm" openLabel="Closing…" onClick={onExit}>Back to the book</BookButton>
       </div>
 
       <div className="folio-view__stage">

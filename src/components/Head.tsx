@@ -12,6 +12,7 @@ interface Props {
   onSignOut: () => void;
   onStats?: () => void;
   statsActive?: boolean;
+  onHome?: () => void;
 }
 const hours = (sec: number) => Math.round(sec / 3600);
 
@@ -25,6 +26,7 @@ export function Head({
   onSignOut,
   onStats,
   statsActive,
+  onHome,
 }: Props) {
   const total = books.reduce((n, b) => n + (b.total_duration_sec || 0), 0);
   const heard = books.reduce(
@@ -42,7 +44,7 @@ export function Head({
       <div className="head__run">
         {openBook ? (
           <>
-            <span>Shelf</span>
+            <button type="button" className="head__crumb" onClick={onHome}>Shelf</button>
             <b>{openBook.title}</b>
             {where && <i>{where}</i>}
           </>

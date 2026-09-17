@@ -1,7 +1,7 @@
 import type { Chapter } from '@/types'
 import type { BookWithProgress } from '@/hooks/useLibrary'
 import { formatDurationLong } from '@/lib/format'
-import { SOURCE_LABEL, stampDate } from '@/lib/paratext'
+import { stampDate } from '@/lib/paratext'
 
 interface Props {
   book: BookWithProgress
@@ -23,7 +23,6 @@ export function Apparatus({ book, chapters, accession, chapterIdx }: Props) {
   if (chapters.length) rows.push(['Chapter', `${chapterIdx + 1} of ${chapters.length}`])
   rows.push(['Length', formatDurationLong(book.total_duration_sec)])
   rows.push(['Progress', `${pct}%`])
-  if (book.source_kind) rows.push(['Layout', SOURCE_LABEL[book.source_kind] ?? book.source_kind])
   if (book.folder_label) rows.push(['Folder', book.folder_label])
 
 

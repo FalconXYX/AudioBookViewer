@@ -8,6 +8,12 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm'
   block?: boolean
   children: ReactNode
+  /**
+   * What the revealed page reads while the book is open. The prototype printed
+   * a different string there than on the cover for a reason — seeing the cover
+   * label again after the book opens makes the whole gesture pointless.
+   */
+  openLabel?: string
   /** Preview harness only: pins the animation at one phase so it can be seen. */
   phaseOverride?: Phase
 }
@@ -34,7 +40,7 @@ const reducedMotion = () =>
  * again, so the sequence is never cut off halfway by a view change.
  */
 export function BookButton({
-  variant, size, block, className = '', children, onClick, phaseOverride, ...rest
+  variant, size, block, className = '', children, onClick, openLabel, phaseOverride, ...rest
 }: Props) {
   const [phase, setPhase] = useState<Phase | undefined>()
   const timers = useRef<number[]>([])
@@ -94,11 +100,10 @@ export function BookButton({
         <span className="btn__rim btn__rim--1" />
         <span className="btn__rim btn__rim--2" />
 
-        {/* The leaf carries the button's OWN label, so the open book shows
-            something real. The prototype printed "Chapter 1" here; inventing
-            content is exactly the costume this design keeps out. */}
+        {/* The revealed page. openLabel is what makes opening the book mean
+            something: "Add a book" on the cover, "Opening folder…" inside. */}
         <span className="btn__leaf btn__leaf--final">
-          <span className="btn__page-text">{children}</span>
+          <span className="btn__page-text">{openLabel ?? children}</span>
         </span>
         <span className="btn__leaf btn__riffle btn__riffle--5" />
         <span className="btn__leaf btn__riffle btn__riffle--4" />

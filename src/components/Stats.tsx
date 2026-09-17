@@ -28,11 +28,48 @@ const TABS: Array<[Tab, string]> = [
   ['devices', 'Devices'], ['settings', 'Settings'],
 ]
 
-const hrs = (s: number) => Math.round(s / 3600)
 const hm = (s: number) => (s >= 3600 ? `${(s / 3600).toFixed(1)} h` : `${Math.round(s / 60)} m`)
+/**
+ * A headline figure and its unit, chosen so the tile never contradicts the
+ * rows beneath it. Rounding 13 minutes to "0 h" is how the overview came to
+ * claim nothing had been listened to and name the book in the same breath.
+ */
+function big(sec: number): [string, string] {
+  if (sec <= 0) return ['0', 'm']
+  if (sec < 3600) return [String(Math.max(1, Math.round(sec / 60))), 'm']
+  if (sec < 36000) return [(sec / 3600).toFixed(1), 'h']
+  return [String(Math.round(sec / 3600)), 'h']
+}
+const plural = (n: number, one: string, many = `${one}s`) => (n === 1 ? one : many)
 const WEEKS = 12
 const DAY_LABEL = (k: string) =>
   new Date(`${k}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+
+/**
+ * One series, so one hue and no legend — the heading names it. Only the peak
+ * carries a number; a label on every one of 84 bars is noise, not data.
+ */
+function DayChart({ series, peak }: { series: Array<{ key: string; seconds: number }>; peak: number }) {
+  return (
+    <>
+      <div className="daychart" role="img"
+           aria-label={`Daily listening over the last ${WEEKS} weeks`}>
+        {series.map((p) => (
+          <span key={p.key} className="daychart__col"
+                title={`${DAY_LABEL(p.key)} — ${p.seconds ? hm(p.seconds) : 'nothing'}`}>
+            <i style={{ height: `${(p.seconds / peak) * 100}%` }}
+               data-peak={p.seconds === peak && p.seconds > 0 ? '' : undefined} />
+          </span>
+        ))}
+      </div>
+      <div className="daychart__axis">
+        <span>{DAY_LABEL(series[0].key)}</span>
+        <span className="daychart__peak">peak {hm(peak)}</span>
+        <span>{DAY_LABEL(series[series.length - 1].key)}</span>
+      </div>
+    </>
+  )
+}
 
 export function Stats({ user, books, settings, onClose, demoDays, demoTab }: Props) {
   const [tab, setTab] = useState<Tab>(demoTab ?? 'overview')
@@ -72,6 +109,7 @@ export function Stats({ user, books, settings, onClose, demoDays, demoTab }: Pro
   const finished = books.filter((b) => b.fractionComplete >= 0.995).length
   const going = books.filter((b) => b.fractionComplete > 0 && b.fractionComplete < 0.995)
   const loggedTotal = days.reduce((n, d) => n + d.seconds_listened, 0)
+  const heardTotal = books.reduce((n, b) => n + (b.progress?.book_position_sec ?? 0), 0)
 
   const thisDevice = getDeviceId()
   const deviceRows = useMemo(() => {
@@ -86,6 +124,9 @@ export function Stats({ user, books, settings, onClose, demoDays, demoTab }: Pro
     }
     return [...m.entries()]
   }, [devices])
+
+  const longest = [...books].sort(
+    (a, b) => (b.total_duration_sec || 0) - (a.total_duration_sec || 0))[0]
 
   const ranked = [...books].sort(
     (a, b) => (byBook.get(b.id) ?? 0) - (byBook.get(a.id) ?? 0)
@@ -118,25 +159,61 @@ export function Stats({ user, books, settings, onClose, demoDays, demoTab }: Pro
                 <span className="tile__v">{books.length}</span>
                 <span className="tile__sub">{finished} finished · {going.length} in progress</span></div>
               <div className="tile"><span className="tile__k">On the shelf</span>
-                <span className="tile__v">{hrs(shelfTotal)}<em>h</em></span></div>
+                <span className="tile__v">{big(shelfTotal)[0]}<em>{big(shelfTotal)[1]}</em></span>
+                <span className="tile__sub">{hm(shelfTotal - heardTotal)} still unheard</span></div>
               <div className="tile"><span className="tile__k">Listened, all time</span>
-                <span className="tile__v">{hrs(loggedTotal)}<em>h</em></span>
+                <span className="tile__v">{big(loggedTotal)[0]}<em>{big(loggedTotal)[1]}</em></span>
                 <span className="tile__sub">recorded as you played it</span></div>
               <div className="tile"><span className="tile__k">Current streak</span>
-                <span className="tile__v">{run}<em>{run === 1 ? 'day' : 'days'}</em></span>
-                <span className="tile__sub">{activeDays} active days in {WEEKS} weeks</span></div>
+                <span className="tile__v">{run}<em>{plural(run, 'day')}</em></span>
+                <span className="tile__sub">
+                  {activeDays} active {plural(activeDays, 'day')} in {WEEKS} weeks</span></div>
             </div>
+
+            {windowTotal > 0 && (
+              <>
+                <h3 className="sc sc--ruled">Last {WEEKS} weeks</h3>
+                <DayChart series={series} peak={peak} />
+              </>
+            )}
+
+            {going.length > 0 && (
+              <>
+                <h3 className="sc sc--ruled">Still reading</h3>
+                <ul className="meters">
+                  {going.map((b) => {
+                    const pct = Math.round(b.fractionComplete * 100)
+                    return (
+                      <li key={b.id}>
+                        <span className="meters__name">{b.title}</span>
+                        <span className="meters__track">
+                          <i style={{ width: `${Math.max(pct, 1)}%` }} /></span>
+                        <span className="meters__val num">{pct}%</span>
+                        <span className="meters__left num">
+                          {formatDurationLong(b.secondsRemaining)} left</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </>
+            )}
 
             <h3 className="sc sc--ruled">Highlights</h3>
             <ul className="facts">
               <li><span>Busiest day</span>
                 <b>{best ? `${DAY_LABEL(best[0])} — ${hm(best[1])}` : 'Nothing recorded yet'}</b></li>
-              <li><span>Last {WEEKS} weeks</span><b>{hm(windowTotal)}</b></li>
-              <li><span>Typical active day</span>
-                <b>{activeDays ? hm(windowTotal / activeDays) : '—'}</b></li>
-              <li><span>Most listened</span>
-                <b>{ranked[0] && byBook.get(ranked[0].id)
-                  ? `${ranked[0].title} — ${hm(byBook.get(ranked[0].id)!)}` : '—'}</b></li>
+              {/* Only worth a row once it differs from the busiest day. */}
+              {activeDays > 1 && (
+                <li><span>Typical active day</span><b>{hm(windowTotal / activeDays)}</b></li>
+              )}
+              {books.length > 1 && ranked[0] && byBook.get(ranked[0].id) && (
+                <li><span>Most listened</span>
+                  <b>{ranked[0].title} — {hm(byBook.get(ranked[0].id)!)}</b></li>
+              )}
+              <li><span>Longest on the shelf</span>
+                <b>{longest ? `${longest.title} — ${formatDurationLong(longest.total_duration_sec)}` : '—'}</b></li>
+              <li><span>Shelf heard</span>
+                <b>{shelfTotal ? `${Math.round((heardTotal / shelfTotal) * 100)}% of ${hm(shelfTotal)}` : '—'}</b></li>
             </ul>
           </section>
         )}
@@ -150,27 +227,7 @@ export function Stats({ user, books, settings, onClose, demoDays, demoTab }: Pro
                 No listening recorded yet. It starts accruing the first time you play a book.
               </p>
             )}
-            {windowTotal > 0 && (
-              <>
-                {/* One series, so one hue and no legend; the heading names it.
-                    Only the peak is labelled — a number on every bar is noise. */}
-                <div className="daychart" role="img"
-                     aria-label={`Daily listening over the last ${WEEKS} weeks`}>
-                  {series.map((p) => (
-                    <span key={p.key} className="daychart__col"
-                          title={`${DAY_LABEL(p.key)} — ${p.seconds ? hm(p.seconds) : 'nothing'}`}>
-                      <i style={{ height: `${(p.seconds / peak) * 100}%` }}
-                         data-peak={p.seconds === peak && p.seconds > 0 ? '' : undefined} />
-                    </span>
-                  ))}
-                </div>
-                <div className="daychart__axis">
-                  <span>{DAY_LABEL(series[0].key)}</span>
-                  <span className="daychart__peak">peak {hm(peak)}</span>
-                  <span>{DAY_LABEL(series[series.length - 1].key)}</span>
-                </div>
-              </>
-            )}
+            {windowTotal > 0 && <DayChart series={series} peak={peak} />}
           </section>
         )}
 

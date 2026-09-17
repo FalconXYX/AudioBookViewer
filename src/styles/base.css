@@ -229,9 +229,16 @@ input:focus-visible, select:focus-visible, button:focus-visible, [tabindex]:focu
   100% { transform: translateZ(8px) rotateY(0deg); opacity: 1; }
 }
 
-/* The one action that matters on a screen: bound in blue, not oxblood. */
+/* The primary action was bound in steel, which made the brightest object on
+   every screen a blue rectangle. It is a better-bound book instead: the same
+   leather one step richer, and the tooling in full gilt rather than blind. */
 .btn--primary .btn__cover {
-  background: linear-gradient(135deg, var(--steel-700) 0%, var(--steel-900) 100%);
+  background: linear-gradient(135deg, var(--wine-700) 0%, var(--wine-900) 100%);
+}
+.btn--primary .btn__tooling {
+  border-color: color-mix(in oklab, var(--book-foil) 78%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--shadow) 28%, transparent),
+    inset 0 0 0 2px color-mix(in oklab, var(--book-foil) 20%, transparent);
 }
 
 /* Secondary actions are not books — a book for Cancel would be noise. */

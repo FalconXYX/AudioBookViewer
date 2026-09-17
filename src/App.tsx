@@ -87,6 +87,7 @@ export default function App() {
         onQuery={setQuery}
         email={auth.user.email}
         onSignOut={() => void auth.signOut()}
+        onHome={() => setView({ name: 'none' })}
         onStats={() => setView(view.name === 'stats' ? { name: 'none' } : { name: 'stats' })}
         statsActive={view.name === 'stats'}
       />
@@ -96,7 +97,12 @@ export default function App() {
         loading={library.loading}
         selectedId={view.name === 'book' ? view.bookId : null}
         query={query}
-        onSelect={(bookId) => setView({ name: 'book', bookId })}
+        onSelect={(bookId) =>
+          // Clicking the open book again closes it, so the shelf is never a
+          // dead end even if the header crumb is missed.
+          setView(view.name === 'book' && view.bookId === bookId
+            ? { name: 'none' }
+            : { name: 'book', bookId })}
         onAdd={() => setView({ name: 'add' })}
       />
 

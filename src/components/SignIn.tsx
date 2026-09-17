@@ -26,7 +26,7 @@ export function SignIn({ onSignIn, loading, error, onDismissError }: Props) {
           </div>
         )}
 
-        <BookButton variant="primary" onClick={onSignIn} disabled={loading}>
+        <BookButton variant="primary" openLabel="Signing in…" onClick={onSignIn} disabled={loading}>
           {loading ? 'Loading…' : 'Sign in with Google'}
         </BookButton>
 

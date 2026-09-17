@@ -1,6 +1,6 @@
 import type { BookWithProgress } from '@/hooks/useLibrary'
 import { BookButton } from './BookButton'
-import { RUN_LABEL, bindingFor, runOf, thicknessFor, type Run } from '@/lib/paratext'
+import { bindingFor, runOf, thicknessFor, type Run } from '@/lib/paratext'
 
 interface Props {
   books: BookWithProgress[]
@@ -32,7 +32,6 @@ export function Shelf({ books, loading, selectedId, query, onSelect, onAdd }: Pr
           if (inRun.length === 0) return null
           return (
             <div className="run" key={run}>
-              <h2 className="run__label"><b>{RUN_LABEL[run]}</b><i className="num">{inRun.length}</i></h2>
               <ul className="run__books">
                 {inRun.map((book) => (
                   <li key={book.id}>
@@ -59,7 +58,7 @@ export function Shelf({ books, loading, selectedId, query, onSelect, onAdd }: Pr
         })}
       </div>
       <div className="case__foot">
-        <BookButton block onClick={onAdd}>Add a book</BookButton>
+        <BookButton block openLabel="Opening folder…" onClick={onAdd}>Add a book</BookButton>
       </div>
     </nav>
   )

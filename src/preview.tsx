@@ -15,7 +15,7 @@ import { Stats } from '@/components/Stats'
 import type { ListeningDay } from '@/types'
 import { Transport } from '@/components/Transport'
 import { formatDurationLong } from '@/lib/format'
-import { stampDate, SOURCE_LABEL } from '@/lib/paratext'
+import { stampDate } from '@/lib/paratext'
 import './styles/theme.css'
 import './styles/base.css'
 import './styles/app.css'
@@ -134,7 +134,6 @@ function Page() {
               <div className="plate__accession">
                 {added && <span>Added <b>{added}</b></span>}
                 <span>{chapters.length} files</span>
-                <span>{SOURCE_LABEL[book.source_kind]}</span>
                 <span>{book.folder_label}</span>
               </div>
             </div>
@@ -155,14 +154,13 @@ function Page() {
           </div>
         </div>
         <div className="spread">
-          <ChapterList chapters={chapters} currentIdx={2} bookTitle={book.title}
+          <ChapterList chapters={chapters} currentIdx={2}
             fraction={book.fractionComplete} markedIdx={new Set([4])}
             onSelect={noop} onToggleMark={noop} disabled={false} />
           <Apparatus book={book} chapters={chapters}
             accession={null} chapterIdx={2} />
         </div>
         <p className="colophon">
-          {chapters.length} files · {formatDurationLong(book.total_duration_sec)} · {book.folder_label}<br />
           <BookButton variant="pamphlet" size="sm">Remove from shelf</BookButton>
         </p>
       </div>
