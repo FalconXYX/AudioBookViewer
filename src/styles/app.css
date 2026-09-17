@@ -700,11 +700,11 @@ input::placeholder { color: var(--text-faint); }
   var(--sh-far); }
 .volume[aria-current='true'] .volume__title { color: var(--ivory-50); }
 .volume__title { display: block; font-family: var(--serif); font-size: var(--fs-body);
-  line-height: 1.24; color: var(--gilt-hi);
+  font-weight: 700; line-height: 1.24; color: var(--gilt-hi);
   text-shadow: 0 1px 0 var(--gilt-deep),
                0 -1px 0 color-mix(in oklab, var(--ivory-50) 12%, transparent); }
-.volume__author { display: block; margin-top: 0.1rem; font-size: var(--fs-micro);
-  color: var(--ink-cool); }
+.volume__author { display: block; margin-top: 0.12rem; font-size: var(--fs-small);
+  font-weight: 600; color: color-mix(in oklab, var(--ivory-200) 78%, transparent); }
 .volume__tag { position: absolute; right: 8px; bottom: 6px; padding: 0 3px;
   border-radius: 1px 1px 2px 1px; background: var(--paper-bright); color: var(--wine-900);
   font-family: var(--mono); font-size: 9px; line-height: var(--tag-h);
@@ -1202,10 +1202,19 @@ input::placeholder { color: var(--text-faint); }
     inset 0 -2px 0 color-mix(in oklab, var(--gilt-deep) 55%, transparent); }
 .tbtn--play:hover:not(:disabled) { color: var(--wine-950);
   background-image: linear-gradient(180deg, var(--ivory-200) 0%, var(--brass-hi) 46%, var(--brass) 100%); }
-.tbtn svg { width: 1.15rem; height: 1.15rem; fill: currentColor; }
+/* The Material skip glyphs carry their numerals inside the arc, so they need
+   more room than a bare triangle before "10" stops being a smudge. */
+.tbtn svg { width: 1.4rem; height: 1.4rem; fill: currentColor; }
 .tbtn--play svg { width: 1.5rem; height: 1.5rem; }
 .tbtn--ribbon { width: 2.2rem; height: 2.6rem; border-radius: var(--r-sm); }
-.tbtn--ribbon svg { width: 0.9rem; height: 1.2rem; fill: var(--paper-red); }
+/* Out: an outline. In: the ribbon is actually there. Previously it was solid
+   red whether or not the chapter had one, which is why it looked inert. */
+.tbtn--ribbon svg { width: 0.9rem; height: 1.2rem;
+  fill: none; stroke: var(--paper-red); stroke-width: 1.6px; }
+.tbtn--ribbon[aria-pressed='true'] svg { fill: var(--paper-red); stroke: var(--paper-red); }
+.tbtn--ribbon[aria-pressed='true'] {
+  background-color: color-mix(in oklab, var(--paper-red) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--paper-red) 55%, transparent); }
 .scrub { flex: 1; -webkit-appearance: none; appearance: none; height: 9px; padding: 0;
   border: 0; border-radius: 1px; cursor: pointer;
   background-image: linear-gradient(180deg, var(--wine-950), var(--void));

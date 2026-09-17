@@ -218,8 +218,11 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
           book={book}
           player={player}
           chapterCount={chapters.length}
+          marked={markedIdx.has(player.chapterIdx)}
           onExit={() => setImmersive(false)}
-          onRibbon={() => void bookmarks.add(player.chapterIdx, player.positionInChapter)}
+          // Was add-only, so pressing it twice made two ribbons and there was
+          // no way to take one out from here.
+          onRibbon={() => toggleMark(player.chapterIdx)}
         />
       )}
     </>

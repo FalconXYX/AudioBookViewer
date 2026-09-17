@@ -7,6 +7,7 @@ interface Props {
   book: Book
   player: PlayerState
   chapterCount: number
+  marked: boolean
   onExit: () => void
   onRibbon: () => void
 }
@@ -15,7 +16,7 @@ interface Props {
  * Listening view. Everything except the cover and the controls is removed —
  * the point is to be in the book, not in an interface.
  */
-export function NowPlaying({ book, player, chapterCount, onExit, onRibbon }: Props) {
+export function NowPlaying({ book, player, chapterCount, marked, onExit, onRibbon }: Props) {
   return (
     <div className="folio-view">
       {/* The shelf stays visible to the left, so the way back belongs on the
@@ -38,7 +39,7 @@ export function NowPlaying({ book, player, chapterCount, onExit, onRibbon }: Pro
         </div>
       </div>
 
-      <Transport player={player} disabled={false} onRibbon={onRibbon} />
+      <Transport player={player} disabled={false} marked={marked} onRibbon={onRibbon} />
     </div>
   )
 }

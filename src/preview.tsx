@@ -189,7 +189,7 @@ function Buttons() {
         <BookButton size="sm">Small</BookButton>
         <BookButton disabled>Unavailable</BookButton>
       </div>
-      <Transport player={player} disabled={false} onRibbon={noop} />
+      <Transport player={player} disabled={false} marked onRibbon={noop} />
     </div>
   )
 }
@@ -198,7 +198,7 @@ const root = createRoot(document.getElementById('root')!)
 root.render(
   view === 'immersive'
     ? <NowPlaying book={book as Book} player={player} chapterCount={chapters.length}
-        onExit={noop} onRibbon={noop} />
+        marked onExit={noop} onRibbon={noop} />
   : view === 'stats' ? <Chrome><Stats
         user={{ id: 'u' } as never}
         books={books}
