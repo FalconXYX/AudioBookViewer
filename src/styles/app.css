@@ -1448,3 +1448,144 @@ input::placeholder { color: var(--text-faint); }
   transition: color var(--t-fast) var(--ease);
 }
 .head__crumb:hover { color: var(--gilt); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- 13. THE COMMONPLACE BOOK ----------
+   Quotes are the one place in the app where the user's own words sit beside
+   the book's. They are set as quotations — the line first and largest, the
+   attribution under it, the machinery last — rather than as list rows with a
+   quote field in them. */
+.quotes { margin-top: var(--s-6); }
+.quotes__list { list-style: none; margin: var(--s-4) 0 0; padding: 0;
+  display: grid; gap: var(--s-4); }
+.quote {
+  position: relative; padding: var(--s-5) var(--s-5) var(--s-4) var(--s-6);
+  border-radius: var(--r-md);
+  background-color: var(--paper);
+  background-image: var(--tex-fox), var(--tex-paper);
+  box-shadow: var(--sh-card);
+}
+/* the quotation mark, cut into the margin the way a printer would set it */
+.quote::before {
+  content: '\201C'; position: absolute; left: 0.45rem; top: 0.1rem;
+  font-family: var(--serif); font-size: 3.2rem; line-height: 1;
+  color: color-mix(in oklab, var(--paper-red) 38%, transparent);
+}
+.quote__text { margin: 0; font-family: var(--serif); font-size: var(--fs-lead);
+  line-height: 1.5; color: var(--paper-ink); }
+.quote__by { margin-top: var(--s-3); display: flex; flex-wrap: wrap;
+  align-items: baseline; gap: 0.5rem; }
+.quote__by cite { font-family: var(--sans); font-style: normal; font-weight: 700;
+  font-size: var(--fs-small); color: var(--paper-ink); }
+.quote__by cite::before { content: '— '; color: color-mix(in oklab, var(--paper-ink) 50%, transparent); }
+.quote__via { font-size: var(--fs-micro); font-style: italic;
+  color: color-mix(in oklab, var(--paper-ink) 62%, transparent); }
+.quote__note { margin: var(--s-3) 0 0; padding-left: var(--s-3);
+  border-left: 2px solid color-mix(in oklab, var(--paper-red) 34%, transparent);
+  font-size: var(--fs-small); font-style: italic;
+  color: color-mix(in oklab, var(--paper-ink) 74%, transparent); }
+.quote__foot { margin-top: var(--s-4); padding-top: var(--s-3);
+  border-top: 1px solid color-mix(in oklab, var(--paper-ink) 13%, transparent);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
+  font-size: var(--fs-micro); color: color-mix(in oklab, var(--paper-ink) 58%, transparent); }
+.quote__spacer { flex: 1 1 auto; }
+.quote__src { font-family: var(--sans); font-weight: 600; color: var(--paper-ink-2); }
+.quote__src--loose { font-weight: 400; font-style: italic; }
+.quote__at { font-family: var(--mono); }
+.quote__tag { padding: 0 0.35rem; border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--paper-ink-2) 16%, transparent);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.05em; }
+.quote__foot .btn--pamphlet { color: var(--paper-ink-2); border-color:
+  color-mix(in oklab, var(--paper-ink) 24%, transparent); }
+.quote__foot .btn--pamphlet:hover { color: var(--paper-ink);
+  border-color: color-mix(in oklab, var(--paper-ink) 52%, transparent); }
+.quotes__empty { margin: var(--s-4) 0 0; max-width: var(--measure);
+  font-size: var(--fs-small); color: var(--ink-cool); }
+.quotes__group { margin-bottom: var(--s-7); }
+.quotes__group .sc--ruled { margin-bottom: var(--s-3); }
+.quotes__group .sc--ruled i { font-style: normal; font-family: var(--mono);
+  color: var(--gilt-lo); margin-left: 0.7rem; }
+.quotes__book { border: 0; background: none; padding: 0; cursor: pointer;
+  font: inherit; color: var(--ink-gilt); letter-spacing: inherit;
+  text-transform: inherit; }
+.quotes__book:hover { color: var(--gilt-hi); text-decoration: underline;
+  text-underline-offset: 3px; }
+.quotes__head { display: flex; align-items: center; gap: var(--s-4);
+  margin-bottom: var(--s-5); }
+.quotes__count { flex: 1; font-family: var(--mono); font-size: var(--fs-micro);
+  color: var(--ink-cool); }
+.quotes__find { margin: 0 auto; min-width: 22rem; }
+
+/* the composer: a card you write on, so it takes paper rather than cloth */
+.composer {
+  width: min(42rem, calc(100vw - 2rem)); max-height: calc(100vh - 4rem);
+  overflow-y: auto; padding: var(--s-5) var(--s-6) var(--s-5);
+  border-radius: var(--radius-card);
+  background-color: var(--paper-buff);
+  background-image: var(--tex-fox), var(--tex-paper),
+    linear-gradient(168deg, color-mix(in oklab, var(--paper-bright) 72%, transparent),
+      transparent 62%);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--paper-ink) 20%, transparent),
+    var(--sh-plate);
+  color: var(--paper-ink);
+}
+.composer--inline { width: auto; max-height: none; margin-bottom: var(--s-6);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--paper-ink) 20%, transparent),
+    var(--sh-card); }
+.composer__title { margin: 0; font-family: var(--serif); font-size: var(--fs-sub);
+  color: var(--paper-ink); }
+.composer__where { margin: 0.2rem 0 var(--s-4); font-family: var(--mono);
+  font-size: var(--fs-micro); color: var(--paper-ink-2); }
+.composer__field { display: block; margin-bottom: var(--s-4); }
+.composer__field > .sc, .composer__clip > .sc {
+  margin-bottom: 0.35rem; color: color-mix(in oklab, var(--paper-ink) 72%, transparent); }
+.composer__field .sc i { font-style: normal; text-transform: none;
+  letter-spacing: 0; opacity: 0.66; }
+.composer__field textarea, .composer__field input,
+.composer__range input {
+  width: 100%; padding: 0.55rem 0.7rem;
+  border: 1px solid color-mix(in oklab, var(--paper-ink) 54%, transparent);
+  border-radius: var(--r-sm);
+  background-color: var(--paper-bright);
+  box-shadow: inset 0 1px 2px color-mix(in oklab, var(--paper-ink) 16%, transparent),
+    0 1px 0 color-mix(in oklab, var(--paper-bright) 80%, transparent);
+  font-family: var(--serif); font-size: var(--fs-body); color: var(--paper-ink);
+  resize: vertical;
+}
+.composer__field textarea::placeholder, .composer__field input::placeholder {
+  color: color-mix(in oklab, var(--paper-ink) 64%, transparent);
+  font-style: italic;
+}
+.composer__field textarea:focus, .composer__field input:focus,
+.composer__range input:focus {
+  outline: 2px solid color-mix(in oklab, var(--paper-red) 62%, transparent);
+  outline-offset: 1px;
+  background-color: var(--paper-bright);
+}
+.composer__clip { margin-bottom: var(--s-5); padding: var(--s-4);
+  border-radius: var(--r-md);
+  background: color-mix(in oklab, var(--paper-ink) 9%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--paper-ink) 14%, transparent); }
+.composer__range { display: flex; align-items: flex-end; gap: var(--s-3);
+  margin: 0.4rem 0 var(--s-3); }
+.composer__range label { display: grid; gap: 0.2rem; width: 6.5rem; }
+.composer__range span { font-size: var(--fs-micro); color: var(--paper-ink-2); }
+.composer__len { align-self: center; font-family: var(--mono);
+  font-size: var(--fs-micro); color: var(--paper-ink-2); }
+.composer__hint { margin: var(--s-3) 0 0; font-size: var(--fs-micro);
+  color: color-mix(in oklab, var(--paper-ink) 66%, transparent); max-width: 32rem; }
+.composer__check { display: flex; align-items: flex-start; gap: 0.55rem;
+  margin-bottom: var(--s-4); font-size: var(--fs-small); cursor: pointer; }
+.composer__busy { margin: 0 0 var(--s-3); font-size: var(--fs-small);
+  color: var(--paper-ink-2); }
+.composer__foot { display: flex; align-items: center; justify-content: flex-end;
+  gap: var(--s-3); margin-top: var(--s-5); }
+.composer .alert { margin: 0 0 var(--s-3); }
+.composer__foot .btn--pamphlet, .composer .btn--pamphlet { color: var(--paper-ink-2);
+  border-color: color-mix(in oklab, var(--paper-ink) 26%, transparent); }
+.composer__foot .btn--pamphlet:hover, .composer .btn--pamphlet:hover {
+  color: var(--paper-ink); border-color: color-mix(in oklab, var(--paper-ink) 55%, transparent); }
+
+/* the quote key sits apart from the transport proper: it makes a thing, it
+   does not move the playhead */
+.tbtn--quote { margin-left: 0.35rem; }
+.tbtn--quote svg { width: 1.25rem; height: 1.25rem; }

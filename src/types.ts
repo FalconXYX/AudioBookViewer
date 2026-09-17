@@ -5,6 +5,7 @@ import type {
   DeviceSource as PrismaDeviceSource,
   ListeningDay as PrismaListeningDay,
   Progress as PrismaProgress,
+  Quote as PrismaQuote,
   UserSettings as PrismaUserSettings,
   SourceKind,
 } from '@prisma/client'
@@ -40,6 +41,7 @@ export type Bookmark = Wire<PrismaBookmark>
 export type DeviceSource = Wire<PrismaDeviceSource>
 export type UserSettings = Wire<PrismaUserSettings>
 export type ListeningDay = Wire<PrismaListeningDay>
+export type Quote = Wire<PrismaQuote>
 
 /** A chapter as produced by scanning, before it has ids or an owner. */
 export type NewChapter = Omit<Chapter, 'id' | 'book_id' | 'user_id'>

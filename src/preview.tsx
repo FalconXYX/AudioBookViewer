@@ -11,8 +11,9 @@ import { Head } from '@/components/Head'
 import { NowPlaying } from '@/components/NowPlaying'
 import { Footer } from '@/components/Footer'
 import { Shelf } from '@/components/Shelf'
+import { QuotesScreen } from '@/components/QuotesScreen'
 import { Stats } from '@/components/Stats'
-import type { ListeningDay } from '@/types'
+import type { ListeningDay, Quote } from '@/types'
 import { Transport } from '@/components/Transport'
 import { formatDurationLong } from '@/lib/format'
 import { stampDate } from '@/lib/paratext'
@@ -194,6 +195,44 @@ function Buttons() {
   )
 }
 
+
+// Demo quotes for the preview harness only. Real ones come from the database.
+const demoQuotes: Quote[] = [
+  {
+    id: 'q1', user_id: 'u', book_id: books[0].id,
+    text: 'The way we talk about things matters, and the names we give things matter.',
+    note: 'The whole thesis in one line.',
+    author: 'John Green', quoted_author: null,
+    chapter_idx: 2, position_sec: 742, clip_start_sec: 712, clip_end_sec: 742,
+    transcribed: true,
+    created_at: '2026-09-16T10:00:00Z', updated_at: '2026-09-16T10:00:00Z',
+  },
+  {
+    id: 'q2', user_id: 'u', book_id: books[0].id,
+    text: 'You can\u2019t see the future coming \u2014 you can only see the past.',
+    note: null, author: 'Ursula K. Le Guin', quoted_author: 'John Green',
+    chapter_idx: 4, position_sec: 128, clip_start_sec: 98, clip_end_sec: 128,
+    transcribed: false,
+    created_at: '2026-09-15T10:00:00Z', updated_at: '2026-09-15T10:00:00Z',
+  },
+  {
+    id: 'q3', user_id: 'u', book_id: books[1].id,
+    text: 'The Beauty of the House is immeasurable; its Kindness infinite.',
+    note: null, author: 'Susanna Clarke', quoted_author: null,
+    chapter_idx: 0, position_sec: 61, clip_start_sec: 31, clip_end_sec: 61,
+    transcribed: true,
+    created_at: '2026-09-14T10:00:00Z', updated_at: '2026-09-14T10:00:00Z',
+  },
+  {
+    id: 'q4', user_id: 'u', book_id: null,
+    text: 'A person who has not made peace with his losses is likely to throw himself into new ones.',
+    note: 'Overheard, not read.', author: 'Marilynne Robinson', quoted_author: 'a friend',
+    chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
+    transcribed: false,
+    created_at: '2026-09-13T10:00:00Z', updated_at: '2026-09-13T10:00:00Z',
+  },
+]
+
 const root = createRoot(document.getElementById('root')!)
 root.render(
   view === 'immersive'
@@ -205,6 +244,11 @@ root.render(
         settings={{ settings: { autoplay_next: true }, loaded: true, set: async () => {} }}
         onClose={noop} demoDays={demoDays} demoTab={tab}
       /></Chrome>
+  : view === 'quotes' ? <QuotesScreen
+        books={books} quotes={demoQuotes} loading={false}
+        onAdd={async () => {}} onRemove={async () => {}}
+        onOpenBook={noop} onClose={noop} demoAdding={params.get('add') === '1'}
+      />
   : view === 'empty' ? <Chrome shelf={[]}><DayBook books={[]} onOpen={noop} onAdd={noop} /></Chrome>
   : view === 'btn'  ? <Chrome><Buttons /></Chrome>
   : view === 'book' ? <Chrome openBook={book}><Page /></Chrome>

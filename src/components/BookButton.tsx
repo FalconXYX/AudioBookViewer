@@ -4,7 +4,7 @@ import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react'
 type Phase = 'riffling' | 'open' | 'closing'
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'pamphlet'
+  variant?: 'primary' | 'pamphlet' | 'quotes' | 'stats'
   size?: 'sm'
   block?: boolean
   children: ReactNode

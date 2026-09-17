@@ -6,9 +6,11 @@ import { Footer } from './components/Footer'
 import { Head } from './components/Head'
 import { Shelf } from './components/Shelf'
 import { SignIn } from './components/SignIn'
+import { QuotesScreen } from './components/QuotesScreen'
 import { Stats } from './components/Stats'
 import { useAuth } from './hooks/useAuth'
 import { useLibrary } from './hooks/useLibrary'
+import { useQuotes } from './hooks/useQuotes'
 import { useSettings } from './hooks/useSettings'
 import { accessionNo } from './lib/paratext'
 
@@ -16,12 +18,14 @@ type View =
   | { name: 'book'; bookId: string }
   | { name: 'add' }
   | { name: 'stats' }
+  | { name: 'quotes' }
   | { name: 'none' }
 
 export default function App() {
   const auth = useAuth()
   const library = useLibrary(auth.user)
   const settings = useSettings(auth.user)
+  const quotes = useQuotes(auth.user)
   const [view, setView] = useState<View>({ name: 'none' })
   const [query, setQuery] = useState('')
 
@@ -45,7 +49,6 @@ export default function App() {
           <nav className="case">
             <div className="case__drawer">
               <div className="run">
-                <h2 className="run__label"><b>Currently reading</b><i className="num">—</i></h2>
                 <ul className="run__books">
                   {[2, 5, 7, 4, 1, 6, 3, 8, 9, 2].map((slot, i) => (
                     <li key={i}>
@@ -90,6 +93,8 @@ export default function App() {
         onHome={() => setView({ name: 'none' })}
         onStats={() => setView(view.name === 'stats' ? { name: 'none' } : { name: 'stats' })}
         statsActive={view.name === 'stats'}
+        onQuotes={() => setView(view.name === 'quotes' ? { name: 'none' } : { name: 'quotes' })}
+        quotesActive={view.name === 'quotes'}
       />
 
       <Shelf
@@ -126,6 +131,9 @@ export default function App() {
             book={openBook}
             accession={accessionNo(library.books, openBook.id)}
             autoplayNext={settings.settings.autoplay_next}
+            quotes={quotes.quotes}
+            onAddQuote={quotes.add}
+            onRemoveQuote={quotes.remove}
             onSetCoverBlob={library.setCoverFromBlob}
             onSetCoverUrl={library.setCoverFromUrl}
             onDelete={(bookId) => {
@@ -151,6 +159,18 @@ export default function App() {
           <Footer />
         )}
       </main>
+
+      {view.name === 'quotes' && (
+        <QuotesScreen
+          books={library.books}
+          quotes={quotes.quotes}
+          loading={quotes.loading}
+          onAdd={quotes.add}
+          onRemove={quotes.remove}
+          onOpenBook={(bookId) => setView({ name: 'book', bookId })}
+          onClose={() => setView({ name: 'none' })}
+        />
+      )}
 
       {view.name === 'stats' && (
         <Stats

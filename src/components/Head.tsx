@@ -12,6 +12,8 @@ interface Props {
   onSignOut: () => void;
   onStats?: () => void;
   statsActive?: boolean;
+  onQuotes?: () => void;
+  quotesActive?: boolean;
   onHome?: () => void;
 }
 const hours = (sec: number) => Math.round(sec / 3600);
@@ -26,6 +28,8 @@ export function Head({
   onSignOut,
   onStats,
   statsActive,
+  onQuotes,
+  quotesActive,
   onHome,
 }: Props) {
   const total = books.reduce((n, b) => n + (b.total_duration_sec || 0), 0);
@@ -73,9 +77,13 @@ export function Head({
         {/* BookView portals its mini transport in here, so playback is reachable
             from the shelf and the add-book flow, not only from BookView. */}
         <div className="head__pill" id="head-transport" />
+        {onQuotes && (
+          <BookButton variant="quotes" size="sm" onClick={onQuotes}
+                      openLabel="Opening…" aria-pressed={quotesActive}>Quotes</BookButton>
+        )}
         {onStats && (
-          <BookButton variant="pamphlet" size="sm" onClick={onStats}
-                      aria-pressed={statsActive}>Statistics</BookButton>
+          <BookButton variant="stats" size="sm" onClick={onStats}
+                      openLabel="Opening…" aria-pressed={statsActive}>Statistics</BookButton>
         )}
         <div className="head__acct">
           <span title={email}>{email}</span>

@@ -8,6 +8,8 @@ interface Props {
   /** Whether this chapter already has a ribbon in it. */
   marked: boolean
   onRibbon: () => void
+  /** Opens the quote composer at the current position. */
+  onQuote?: () => void
 }
 
 const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3]
@@ -39,7 +41,7 @@ function SkipIcon({ dir }: { dir: 'back' | 'forward' }) {
   )
 }
 
-export function Transport({ player, disabled, marked, onRibbon }: Props) {
+export function Transport({ player, disabled, marked, onRibbon, onQuote }: Props) {
   // While dragging, follow the pointer rather than the timeupdate stream,
   // which fires four times a second and would fight the user.
   const [scrub, setScrub] = useState<number | null>(null)
@@ -140,6 +142,22 @@ export function Transport({ player, disabled, marked, onRibbon }: Props) {
         >
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6h2v12h-2zM7 6l8 6-8 6z" /></svg>
         </button>
+
+        {onQuote && (
+          <button
+            type="button"
+            className="tbtn tbtn--quote"
+            aria-label="Keep this line as a quote"
+            title="Keep this line — grabs the last 30 seconds"
+            disabled={disabled}
+            onClick={onQuote}
+          >
+            {/* Material `format_quote`. */}
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="rate">

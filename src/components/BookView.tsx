@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { User } from '@supabase/supabase-js'
 import type { BookWithProgress } from '@/hooks/useLibrary'
+import type { Quote } from '@/types'
 import { useBookSource } from '@/hooks/useBookSource'
 import { useBookmarks } from '@/hooks/useBookmarks'
 import { useChapters } from '@/hooks/useChapters'
@@ -10,11 +11,15 @@ import { usePlayer } from '@/hooks/usePlayer'
 import { useProgress } from '@/hooks/useProgress'
 import { formatDurationLong, formatTime } from '@/lib/format'
 import { stampDate } from '@/lib/paratext'
+import type { NewQuote } from '@/hooks/useQuotes'
+import { useBookQuotes } from '@/hooks/useQuotes'
 import { Apparatus } from './Apparatus'
 import { BookButton } from './BookButton'
 import { ChapterList } from './ChapterList'
 import { CoverPasteTarget } from './CoverPasteTarget'
 import { NowPlaying } from './NowPlaying'
+import { QuoteComposer } from './QuoteComposer'
+import { QuoteList } from './QuoteList'
 import { SourceGate } from './SourceGate'
 
 interface Props {
@@ -22,12 +27,19 @@ interface Props {
   book: BookWithProgress
   accession: string | null
   autoplayNext: boolean
+  /** Every quote the user owns; this view picks out and orders its own. */
+  quotes: Quote[]
+  onAddQuote: (q: NewQuote) => Promise<unknown>
+  onRemoveQuote: (id: string) => Promise<void>
   onSetCoverBlob: (bookId: string, blob: Blob) => Promise<void>
   onSetCoverUrl: (bookId: string, url: string) => Promise<void>
   onDelete: (bookId: string) => void
 }
 
-export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, onSetCoverUrl, onDelete }: Props) {
+export function BookView({
+  user, book, accession, autoplayNext, quotes, onAddQuote, onRemoveQuote,
+  onSetCoverBlob, onSetCoverUrl, onDelete,
+}: Props) {
   const { chapters } = useChapters(book.id)
   const source = useBookSource(user, book, chapters)
   const progress = useProgress(user, book.id)
@@ -37,6 +49,8 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
   const [immersive, setImmersive] = useState(false)
   /** Where the head's mini transport is portalled to. */
   const [headSlot, setHeadSlot] = useState<HTMLElement | null>(null)
+  /** Non-null while the quote composer is open, holding the captured moment. */
+  const [quoting, setQuoting] = useState<{ chapterIdx: number; at: number } | null>(null)
 
   const ready = source.status === 'ready' && progress.loaded && chapters.length > 0
 
@@ -98,6 +112,9 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
   const started = book.fractionComplete > 0
   const pct = Math.min(100, book.fractionComplete * 100)
   const added = stampDate(book.created_at)
+
+  // In the order they are said, which is not the order they were kept.
+  const bookQuotes = useBookQuotes(quotes, book.id)
 
   const markedIdx = useMemo(
     () => new Set(bookmarks.bookmarks.map((m) => m.chapter_idx)),
@@ -177,6 +194,19 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
             />
           </div>
 
+          <QuoteList
+            quotes={bookQuotes}
+            chapters={chapters}
+            heading="Quotes from this book"
+            emptyNote="Nothing kept from this book yet."
+            onGoTo={(q) => {
+              if (q.chapter_idx === null || q.position_sec === null) return
+              setImmersive(true)
+              void player.goToChapter(q.chapter_idx, q.position_sec, false)
+            }}
+            onRemove={onRemoveQuote}
+          />
+
           <p className="colophon">
             <BookButton
               variant="pamphlet"
@@ -223,6 +253,24 @@ export function BookView({ user, book, accession, autoplayNext, onSetCoverBlob, 
           // Was add-only, so pressing it twice made two ribbons and there was
           // no way to take one out from here.
           onRibbon={() => toggleMark(player.chapterIdx)}
+          onQuote={() => setQuoting({ chapterIdx: player.chapterIdx, at: player.positionInChapter })}
+        />
+      )}
+      {quoting && (
+        <QuoteComposer
+          bookId={book.id}
+          bookAuthor={book.author}
+          chapter={chapters[quoting.chapterIdx] ?? null}
+          chapterIdx={quoting.chapterIdx}
+          at={quoting.at}
+          getFile={ready
+            ? async () => {
+                const c = chapters[quoting.chapterIdx]
+                return c ? source.getFile(c.file_name) : null
+              }
+            : null}
+          onSave={onAddQuote}
+          onClose={() => setQuoting(null)}
         />
       )}
     </>

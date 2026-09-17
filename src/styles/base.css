@@ -241,6 +241,23 @@ input:focus-visible, select:focus-visible, button:focus-visible, [tabindex]:focu
     inset 0 0 0 2px color-mix(in oklab, var(--book-foil) 20%, transparent);
 }
 
+/* The two destinations are bound in their own cloth, so a glance at the header
+   tells them apart from each other and from every other book on the page.
+   Both are real binding colours and both keep the gold foil legible; a tan or
+   russet calf would not, being gold on gold. */
+.btn--quotes .btn__cover {   /* green cloth, as a commonplace book is bound */
+  background: linear-gradient(135deg, var(--teal-800) 0%, var(--teal-900) 100%);
+}
+/* Silver tooling, not gold. Two dark blue-greens sat only 6 ΔE apart, which is
+   perceptible but not safely so, and worse under red-green colour blindness;
+   taking the green a couple of steps lighter separates them properly, and a
+   light binding wants a light foil to keep the label legible. Silver-stamped
+   cloth is as ordinary a binding as gilt calf. */
+.btn--quotes .btn__label { color: var(--ivory-100); }
+.btn--stats .btn__cover {    /* blue buckram, as a ledger is bound */
+  background: linear-gradient(135deg, var(--steel-800) 0%, var(--steel-950) 100%);
+}
+
 /* Secondary actions are not books — a book for Cancel would be noise. */
 .btn--pamphlet {
   min-width: 0; height: auto; perspective: none;
