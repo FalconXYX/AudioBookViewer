@@ -1,0 +1,12 @@
+node_modules
+dist
+*.local
+
+# Every env file is ignored by default, so a stray .env.bak or .env.production
+# can never be committed. The two example files are the only exceptions.
+.env*
+!.env.example
+!.env.local.example
+
+# Contains the Supabase database password — never commit.
+Secret.txt

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Button Animation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            background: #ecefe6;
+            font-family: Georgia, "Times New Roman", serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        :root {
+            --book-w: 156px;
+            --book-h: 44px;
+            --spine-w: 8px;
+            --leather-bg: linear-gradient(135deg, #44171d 0%, #290d11 100%);
+            --gold-foil: #dfba6b;
+            --paper-cream: #fbf7ee;
+            --paper-dark: #eee7d5;
+            --paper-line: #d3c7af;
+        }
+
+        /* Standard-sized button container */
+        .book-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            width: var(--book-w);
+            height: var(--book-h);
+            padding: 0;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            perspective: 900px;
+            outline: none;
+            user-select: none;
+        }
+
+        .book-btn:focus-visible {
+            outline: 2px solid #8e2a36;
+            outline-offset: 5px;
+            border-radius: 4px;
+        }
+
+        .book-container,
+        .book-container * {
+            pointer-events: none;
+        }
+
+        /* 3D anchor */
+        .book-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+        }
+
+        /* Hardcover spine */
+        .book-spine {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--spine-w);
+            background: #1c080a;
+            border-radius: 3px 0 0 3px;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            box-shadow: inset -1px 0 2px rgba(0, 0, 0, 0.6);
+        }
+
+        .spine-rib {
+            width: 100%;
+            height: 2px;
+            background: rgba(223, 186, 107, 0.4);
+        }
+
+        /* Multi-layered dense page deck along the side and bottom */
+        .book-stack-edge {
+            position: absolute;
+            inset: 2px 2px 2px var(--spine-w);
+            background: var(--paper-cream);
+            border-radius: 0 4px 4px 0;
+            box-shadow:
+                1px 0 0 var(--paper-line),
+                2px 0 0 var(--paper-cream),
+                3px 0 0 var(--paper-line),
+                4px 0 0 var(--paper-cream),
+                5px 0 0 var(--paper-line),
+                6px 0 0 var(--paper-cream),
+                7px 0 0 var(--paper-line),
+                8px 2px 6px rgba(0, 0, 0, 0.22);
+            z-index: 1;
+        }
+
+        /* Layered page rims under the cover to look like an authentic ream */
+        .page-rim {
+            position: absolute;
+            top: 2px;
+            bottom: 2px;
+            right: 0;
+            background: var(--paper-cream);
+            border-left: 1px solid var(--paper-line);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .page-rim-1 {
+            width: calc(100% - var(--spine-w) - 3px);
+            z-index: 2;
+        }
+
+        .page-rim-2 {
+            width: calc(100% - var(--spine-w) - 6px);
+            z-index: 3;
+        }
+
+        /* Shared paper sheet geometry */
+        .book-leaf {
+            position: absolute;
+            inset: 1px 1px 1px var(--spine-w);
+            border-radius: 0 4px 4px 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backface-visibility: hidden;
+            background: var(--paper-cream);
+            will-change: transform;
+        }
+
+        /* Final landing page revealed after rifling */
+        .page-final {
+            z-index: 4;
+            transform: translateZ(1px);
+            box-shadow: inset 5px 0 8px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Dynamic fluttering pages */
+        .rifle-page {
+            box-shadow: inset 5px 0 8px rgba(0, 0, 0, 0.08);
+            display: none;
+        }
+
+        .rifle-page.page-5 {
+            z-index: 5;
+            transform: translateZ(2px);
+        }
+
+        .rifle-page.page-4 {
+            z-index: 6;
+            transform: translateZ(3px);
+        }
+
+        .rifle-page.page-3 {
+            z-index: 7;
+            transform: translateZ(4px);
+        }
+
+        .rifle-page.page-2 {
+            z-index: 8;
+            transform: translateZ(5px);
+        }
+
+        .rifle-page.page-1 {
+            z-index: 9;
+            transform: translateZ(6px);
+        }
+
+        /* Preview page seen on hover */
+        .page-preview {
+            z-index: 10;
+            transform: translateZ(7px);
+            box-shadow: inset 5px 0 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .page-text {
+            font-size: 13px;
+            font-style: italic;
+            font-weight: 600;
+            color: #2b1f1d;
+            letter-spacing: 0.4px;
+        }
+
+        /* Leather cover */
+        .book-cover {
+            inset: 0 0 0 var(--spine-w);
+            background: var(--leather-bg);
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.28);
+            z-index: 12;
+            transform: translateZ(8px);
+            transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.25, 1),
+                box-shadow 0.26s cubic-bezier(0.2, 0.8, 0.25, 1);
+        }
+
+        .cover-border {
+            width: calc(100% - 10px);
+            height: calc(100% - 8px);
+            border: 1px solid rgba(223, 186, 107, 0.45);
+            border-radius: 0 3px 3px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+        }
+
+        .cover-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gold-foil);
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Regular hover: cover cracks open */
+        .book-btn:not(.is-rifling):not(.is-open):not(.is-closing):hover .book-cover {
+            transform: translateZ(8px) rotateY(-38deg);
+            box-shadow: -5px 3px 10px rgba(0, 0, 0, 0.28);
+        }
+
+        /* RIFLING ANIMATION SEQUENCE */
+        .book-btn.is-rifling .book-cover {
+            animation: flipCover 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .book-btn.is-rifling .page-preview {
+            animation: flipPage 0.38s 0.03s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .book-btn.is-rifling .rifle-page {
+            display: flex;
+        }
+
+        .book-btn.is-rifling .page-1 {
+            animation: flipPage 0.34s 0.06s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .book-btn.is-rifling .page-2 {
+            animation: flipPage 0.34s 0.10s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .book-btn.is-rifling .page-3 {
+            animation: flipPage 0.34s 0.14s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .book-btn.is-rifling .page-4 {
+            animation: flipPage 0.34s 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .book-btn.is-rifling .page-5 {
+            animation: flipPage 0.34s 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* REMAINS OPEN (Reading state) */
+        .book-btn.is-open .book-cover {
+            transform: translateZ(8px) rotateY(-130deg);
+            opacity: 0.9;
+        }
+
+        .book-btn.is-open .page-preview,
+        .book-btn.is-open .rifle-page {
+            display: none;
+        }
+
+        /* CLOSING ANIMATION SEQUENCE */
+        .book-btn.is-closing .book-cover {
+            animation: closeCover 0.34s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .book-btn.is-closing .page-preview,
+        .book-btn.is-closing .rifle-page {
+            display: none;
+        }
+
+        @keyframes flipCover {
+            0% {
+                transform: translateZ(8px) rotateY(-38deg);
+            }
+
+            100% {
+                transform: translateZ(8px) rotateY(-130deg);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes flipPage {
+            0% {
+                transform: translateZ(5px) rotateY(0deg);
+            }
+
+            100% {
+                transform: translateZ(5px) rotateY(-115deg);
+                opacity: 0.12;
+            }
+        }
+
+        @keyframes closeCover {
+            0% {
+                transform: translateZ(8px) rotateY(-130deg);
+                opacity: 0.9;
+            }
+
+            80% {
+                transform: translateZ(8px) rotateY(2deg);
+                box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.28);
+            }
+
+            100% {
+                transform: translateZ(8px) rotateY(0deg);
+                opacity: 1;
+            }
+        }
+
+        /* Status badge */
+        .status-badge {
+            font-size: 13px;
+            color: #3b2a26;
+            background: #e2dec9;
+            padding: 6px 14px;
+            border-radius: 20px;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .status-badge.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Book Button -->
+    <button class="book-btn" id="bookBtn" type="button" aria-label="Open Chapter">
+        <div class="book-container">
+
+            <!-- Hardcover spine with ribs -->
+            <div class="book-spine">
+                <span class="spine-rib"></span>
+                <span class="spine-rib"></span>
+                <span class="spine-rib"></span>
+            </div>
+
+            <!-- Outer 8-stripe dense page deck -->
+            <div class="book-stack-edge"></div>
+
+            <!-- Stepped paper edges -->
+            <div class="page-rim page-rim-1"></div>
+            <div class="page-rim page-rim-2"></div>
+
+            <!-- Final landing page -->
+            <div class="book-leaf page-final">
+                <span class="page-text">Chapter 1</span>
+            </div>
+
+            <!-- Rapid flutter pages -->
+            <div class="book-leaf rifle-page page-5"></div>
+            <div class="book-leaf rifle-page page-4"></div>
+            <div class="book-leaf rifle-page page-3"></div>
+            <div class="book-leaf rifle-page page-2"></div>
+            <div class="book-leaf rifle-page page-1"></div>
+
+            <!-- Hover preview page -->
+            <div class="book-leaf page-preview">
+                <span class="page-text">Prologue</span>
+            </div>
+
+            <!-- Front leather cover -->
+            <div class="book-leaf book-cover">
+                <div class="cover-border">
+                    <span class="cover-text">Open Book</span>
+                </div>
+            </div>
+
+        </div>
+    </button>
+
+    <div class="status-badge" id="statusBadge">Book opened: Chapter 1</div>
+
+    <script>
+        const button = document.getElementById('bookBtn');
+        const badge = document.getElementById('statusBadge');
+
+        button.addEventListener('click', () => {
+            // Ignore clicks while any animation is active
+            if (
+                button.classList.contains('is-rifling') ||
+                button.classList.contains('is-open') ||
+                button.classList.contains('is-closing')
+            ) return;
+
+            // 1. Rifle open through the pages
+            button.classList.add('is-rifling');
+
+            // 2. Settle on Chapter 1
+            setTimeout(() => {
+                button.classList.remove('is-rifling');
+                button.classList.add('is-open');
+                badge.textContent = 'Book opened: Chapter 1';
+                badge.classList.add('visible');
+
+                // 3. Keep open to read, then trigger the closing sequence
+                setTimeout(() => {
+                    badge.textContent = 'Closing book...';
+                    button.classList.remove('is-open');
+                    button.classList.add('is-closing');
+
+                    // 4. Reset completely back to idle cover
+                    setTimeout(() => {
+                        button.classList.remove('is-closing');
+                        badge.classList.remove('visible');
+                    }, 340);
+                }, 1400);
+
+            }, 480);
+        });
+    </script>
+</body>
+
+</html>

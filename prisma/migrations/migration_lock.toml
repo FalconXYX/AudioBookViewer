@@ -1,0 +1,2 @@
+# Do not edit. Tells Prisma which database this migration history targets.
+provider = "postgresql"

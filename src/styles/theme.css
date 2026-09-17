@@ -1,0 +1,247 @@
+/* =============================================================================
+   THEME — THE BOUND SET.  The single definition file.
+       npm run theme:check      (verified: 265 tokens, every colour a ./colors step)
+
+   Colour is assigned by MATERIAL, never by decoration. The field is the dark
+   air of the room and objects rise out of it. One light source, fixed,
+   upper-left: what faces it takes gold, what faces away takes steel. No shadow
+   is ever neutral — cast shadows are steel-950, recesses are teal-950.
+   ========================================================================== */
+:root{
+  /* 0. PALETTE — literal steps from ./colors, the only raw hexes ---------- */
+  --wine-500:#cd3432;--wine-600:#a42a28;--wine-700:#7b1f1e;
+  --wine-800:#521514;--wine-900:#290a0a;--wine-950:#1d0707;
+  --ivory-50:#fcf6e8;--ivory-100:#faeed1;--ivory-200:#f4dca4;
+  --gold-300:#efcb76;--gold-400:#eab948;--gold-500:#e4a81b;--gold-600:#b78615;
+  --gold-700:#896510;--gold-800:#5b430b;--gold-900:#2e2205;--gold-950:#201704;
+  --steel-100:#d8e7f3;--steel-200:#b0cfe8;--steel-300:#89b7dc;--steel-400:#629fd0;
+  --steel-500:#3b86c4;--steel-600:#2f6c9d;--steel-700:#235176;--steel-800:#17364f;
+  --steel-900:#0c1b27;--steel-950:#08131b;
+  --azure-300:#6dc3f8;--azure-400:#3caff6;--azure-500:#0b9bf4;
+  --azure-700:#075d92;--azure-800:#053e61;--azure-900:#021f31;
+  --teal-700:#009991;--teal-800:#006661;--teal-900:#003330;--teal-950:#002422;
+  --wine-chosen:#631918;          /* the one hex not from ./colors: yours */
+
+  /* 1. THE THREE BLACKS. A supplement, not the mechanism — a 1-point
+     luminance spread cannot carry the anti-monochrome argument on its own.
+     The mechanism is area (sections 2, 3, 5). ----------------------------- */
+  --air:var(--wine-950);          /* the room's air — the main field       */
+  --shadow:var(--steel-950);      /* EVERY cast shadow. Never neutral.     */
+  --void:var(--teal-950);         /* every slot, groove, recess, gutter    */
+
+  /* 2. THE ROOM AND THE CASE --------------------------------------------- */
+  --field:var(--air);--field-warm:var(--wine-900);
+  --case:var(--steel-900);--case-back:var(--steel-950);--case-lip:var(--steel-800);
+  --felt:var(--steel-800);
+  --sheet:var(--steel-800);       /* long-form content never sits on wine.
+                                     L 3.39% against #631918's 3.41%: an
+                                     equal-weight material, not a brighter
+                                     accent, so blue stays an accent.      */
+  --sheet-lit:var(--steel-700);--sheet-deep:var(--steel-900);
+  --inlay:var(--wine-chosen);--inlay-dim:var(--wine-800);--inlay-edge:var(--wine-900);
+
+  /* 3. OAK, BRASS, FELT. ./colors has no brown, so oak is the dark end of
+     the gold ramp; gold-800 reads as stained oak, gold-600 as its lit edge. */
+  --plank-lit:var(--gold-600);--plank:var(--gold-800);
+  --plank-mid:var(--gold-900);--plank-deep:var(--gold-950);
+  --brass-hi:var(--gold-300);--brass:var(--gold-500);
+  --brass-mid:var(--gold-700);--brass-lo:var(--gold-800);
+
+  /* 4. BINDING CLOTH AND BOARDS ------------------------------------------ */
+  --board:var(--wine-chosen);--board-hi:var(--wine-700);--board-lo:var(--wine-800);
+  --board-edge:var(--wine-950);--hinge:var(--wine-900);
+
+  /* 5. PAPER AND INK ON PAPER. Ivory is never a fill, always a surface.
+     Large sheets use ivory-100, and every leaf is framed by a board with
+     margin: an abrupt ivory-to-near-black edge is what actually glares. --- */
+  --paper:var(--ivory-100);--paper-bright:var(--ivory-50);--paper-buff:var(--ivory-200);
+  --paper-shade:var(--gold-800);--paper-ink:var(--wine-950);--paper-ink-2:var(--steel-800);
+  --paper-rule:var(--steel-500);--paper-red:var(--wine-500);
+  --stamp-green:var(--teal-900);--stamp-blue:var(--steel-800);--stamp-red:var(--wine-600);
+  --fox:var(--gold-700);--ink-red:var(--paper-red);
+
+  /* 6. INK ON DARK. Secondary meta is BLUE, labels are GOLD. ------------- */
+  --ink-bright:var(--ivory-50);--ink-dim-alpha:72%;--ink-faint-alpha:46%;
+  --ink-cool:var(--steel-300);--ink-gilt:var(--gold-400);
+
+  /* 7. GILT AND BLIND TOOLING -------------------------------------------- */
+  --gilt-pale:var(--ivory-200);--gilt-hi:var(--gold-300);--gilt:var(--gold-500);
+  --gilt-mid:var(--gold-600);--gilt-lo:var(--gold-700);
+  --gilt-blind:var(--gold-800);--gilt-deep:var(--gold-950);
+
+  /* 7b. TEXTURES, scoped per material. A single global grain averages every
+     surface toward one treatment, and `overlay` at 5% lightens ivory while
+     doing nothing over near-black — strongest exactly where paper should be
+     matte. These are plain background layers: no blend mode, no isolation
+     problem, and every pseudo-element stays free for the punched hole, the
+     red head rule and the gutter shadow those same surfaces need. -------- */
+  --weave-line:1px;--weave-pitch:3px;
+  --tex-cloth:none;
+  --tex-paper:none;
+  --tex-fox:none;
+  --tex-felt:none;
+  --tex-oak:none;
+
+  /* 8. MARBLED ENDPAPER --------------------------------------------------- */
+  --marble-1:transparent;--marble-2:transparent;--marble-3:transparent;
+  --marble-4:transparent;--marble-5:transparent;
+
+  /* 9. THE ACCENT PROPER — focus, now-playing, current chapter, scrub
+     handle. Nowhere else. It is cold, so it makes wine read warmer. ------ */
+  --accent-core:var(--azure-500);--accent-hi:var(--azure-400);
+  --accent-navy:var(--azure-800);--accent-alpha:16%;
+
+  /* 10. BINDINGS. The old set was eight steps all from 800/900, so they
+     differed only in hue at one luminance: binding-1 vs binding-2 was a
+     1.00 contrast ratio and binding-6 was byte-identical to the rail it sat
+     on. These span relative luminance 1.0% -> 14.7%. Three are wine, at
+     three clearly separated values, because wine is still the main colour.
+     Shelf.tsx: BINDING_COUNT must equal --binding-count. ----------------- */
+  --binding-count:9;
+  --binding-1:var(--wine-chosen); /* wine cloth      L 3.4%  */
+  --binding-2:var(--steel-700);   /* blue buckram    L 7.6%  */
+  --binding-3:var(--wine-800);    /* oxblood         L 2.4%  */
+  --binding-4:var(--gold-700);    /* tan calf        L 14.7% */
+  --binding-5:var(--azure-800);   /* navy morocco    L 4.3%  */
+  --binding-6:var(--teal-900);    /* green cloth     L 2.6%  */
+  --binding-7:var(--wine-700);    /* crimson cloth   L 5.3%  */
+  --binding-8:var(--steel-900);   /* black cloth     L 1.0%  */
+  --binding-9:var(--gold-800);    /* russet leather  L 6.3%  */
+
+  /* 11. THE BOOK BUTTON. Five cloth steps per variant so the press darkens
+     the board by moving its gradient stops one stop, never by fading an
+     overlay in. ---------------------------------------------------------- */
+  --cloth-1:var(--wine-700);--cloth-2:var(--wine-chosen);--cloth-3:var(--wine-800);
+  --cloth-4:var(--wine-900);--cloth-5:var(--wine-950);
+  --spine-1:var(--wine-800);--spine-2:var(--wine-700);--spine-3:var(--wine-900);
+  --btn-gilt:var(--gold-500);--btn-gilt-hi:var(--gold-300);--btn-ink:var(--gold-500);
+  --spine-w:14px;      /* wide enough to carry a headband and two bands   */
+  --fore-edge:6px;     /* page block visible at rest                      */
+  --edge-w:19px;       /* total block width; 13px hides under the board   */
+  --squares:3px;       /* board overhang over the text block              */
+  --hinge-in:6px;      /* transform-origin inset — the hinge GROOVE       */
+  --gutter-rest:3px;--gutter-open:7px;
+  --leaf-rest:2px;--leaf-open:3px;
+  --sheen-rest:34%;--sheen-open:58%;
+  --book-h:2.75rem;    /* 44px. Below ~34px do not use a book at all.     */
+  --book-h-sm:2.2rem;--r-fore:5px;
+
+  /* 12. RULES AND SHADOWS. One vocabulary: a hard contact line that never
+     blurs and never moves, plus a soft blue-tinted falloff that travels. -- */
+  --line-alpha:15%;--line-strong-alpha:28%;--rule-gilt-alpha:52%;
+  --sh-contact:0 1px 0 var(--board-edge);
+  --sh-near:0 1px 0 var(--board-edge), 0 3px 8px -3px color-mix(in oklab, var(--shadow) 76%, transparent);
+  --sh-far:0 2px 0 var(--board-edge), 0 12px 26px -9px color-mix(in oklab, var(--shadow) 74%, transparent);
+  --sh-lift:0 3px 0 var(--board-edge), 0 22px 50px -16px color-mix(in oklab, var(--shadow) 80%, transparent);
+  --sh-plate:0 1px 0 var(--void), 0 16px 38px -14px color-mix(in oklab, var(--shadow) 82%, transparent);
+  --sh-card:0 1px 0 var(--void), 0 6px 14px -7px color-mix(in oklab, var(--shadow) 72%, transparent);
+  --sh-sunk:inset 0 2px 5px -1px color-mix(in oklab, var(--void) 78%, transparent), inset 0 -1px 0 color-mix(in oklab, var(--ivory-50) 6%, transparent);
+
+  /* 13. GEOMETRY ---------------------------------------------------------- */
+  --case-w:21rem;--head-h:4.75rem;--apparatus-w:17rem;--measure:34rem;
+  --plank-h:11px;--ribbon-w:13px;--tag-h:13px;
+  --s-1:0.25rem;--s-2:0.5rem;--s-3:0.75rem;--s-4:1rem;
+  --s-5:1.5rem;--s-6:2rem;--s-7:3rem;--s-8:4rem;
+  --r-sm:2px;--r-md:4px;--r-lg:7px;--rule-pitch:26px;
+  --thick:38px;        /* a volume's board thickness; set per book         */
+  --pct:0%;            /* progress; set per book                           */
+
+  /* 14. TYPE. Eight steps at ~1.22, replacing seventeen sizes of which
+     thirteen sat inside a 5px band with 0.32px steps between them. html
+     takes an explicit 16px (see additions) so every rem is finally
+     proportional to the base — body was 15px while rems resolved to 16. -- */
+  --serif:"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", ui-serif, Georgia, serif;
+  --sans:ui-sans-serif, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --mono:ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --fs-micro:0.6875rem;  /* 11px  call numbers, stamps, folios  */
+  --fs-label:0.75rem;    /* 12px  the small-caps label system   */
+  --fs-small:0.8125rem;  /* 13px  captions, durations           */
+  --fs-body:0.9375rem;   /* 15px  interface body                */
+  --fs-lead:1.0625rem;   /* 17px  contents entries, page body   */
+  --fs-sub:1.375rem;     /* 22px  section heads, ledger figures */
+  --fs-head:1.875rem;    /* 30px  chapter opening               */
+  --fs-title:clamp(2.25rem, 4.2vw, 3.25rem);
+  --lh-tight:1.12;--lh-text:1.62;--track-label:0.14em;--track-wide:0.22em;
+
+  /* 15. MOTION ------------------------------------------------------------ */
+  --ease-open:cubic-bezier(0.22, 0.7, 0.28, 1);
+  --ease-fall:cubic-bezier(0.4, 0, 1, 1);      /* it falls; it does not glide */
+  --ease-settle:cubic-bezier(0.2, 0.8, 0.3, 1);
+  --t-open:240ms;--t-shut:210ms;--t-fast:130ms;--t-med:190ms;
+  --board-open-angle:14deg;   /* the board turns AWAY, uncovering the pages */
+  --book-perspective:580px;
+  --spine-tip:-7deg;          /* a spine tipped out from its FOOT           */
+  --spine-perspective:760px;
+
+  /* 16. REGISTERED PROPERTY MIRRORS. @property registers these so angles,
+     lengths, percentages and COLOURS interpolate instead of stepping.
+     initial-value takes a literal, so the registrations live in this file,
+     the only one allowed a hex; each is mirrored here so theme:check sees
+     it defined. Deleting an apparently redundant line breaks a gesture. -- */
+  --board-open:0deg;--board-lit:var(--cloth-1);--board-face:var(--cloth-2);
+  --board-shade:var(--cloth-3);--gutter-w:3px;--leaf-pitch:2px;
+  --sheen:34%;--lamp:9%;--board-clip:0px;
+
+  /* 17. LEGACY ALIASES. Kept only so the un-migrated parts of app.css keep
+     compiling while they are replaced rule by rule. Delete a line the moment
+     nothing references it. --shadow-rgb is steel-950 expressed as a triple,
+     NOT 0 0 0: the doctrine is that no shadow here is ever neutral, and an
+     alias must not quietly re-admit one. --------------------------------- */
+  --shadow-rgb:8 19 27;--grain-opacity:0;
+  --bg:var(--field);--bg-raised:var(--sheet);--bg-sunken:var(--case);
+  --bg-deep:var(--air);--bg-hover:var(--board-hi);
+  --wine:var(--wine-chosen);--wine-raised:var(--wine-800);--wine-sunken:var(--wine-900);
+  --wine-deep:var(--wine-950);--wine-hover:var(--wine-800);--wine-edge:var(--wine-900);
+  --ink:var(--ink-bright);--text:var(--ink-bright);
+  --text-dim:color-mix(in oklab, var(--ivory-100) var(--ink-dim-alpha), transparent);
+  --text-faint:color-mix(in oklab, var(--ivory-200) var(--ink-faint-alpha), transparent);
+  --accent:var(--accent-core);--accent-deep:var(--azure-700);--accent-light:var(--azure-300);
+  --accent-wash:var(--accent-alpha);
+  --accent-soft:color-mix(in oklab, var(--accent-core) var(--accent-alpha), transparent);
+  --gold:var(--gilt);--gilt-rule:var(--rule-gilt-alpha);
+  --gilt-line:color-mix(in oklab, var(--gilt) var(--rule-gilt-alpha), transparent);
+  --line:color-mix(in oklab, var(--ivory-100) var(--line-alpha), transparent);
+  --line-strong:color-mix(in oklab, var(--ivory-100) var(--line-strong-alpha), transparent);
+  --rule:var(--line);--rule-strong:var(--line-strong);
+  --rule-paper:color-mix(in oklab, var(--paper-ink) 22%, transparent);
+  --rule-feint:color-mix(in oklab, var(--paper-rule) 30%, transparent);
+  --wood-top:var(--plank);--wood-mid:var(--plank-mid);--wood-bottom:var(--plank-deep);
+  --paper-1:color-mix(in oklab, var(--ivory-50) 95%, transparent);
+  --paper-2:color-mix(in oklab, var(--ivory-100) 82%, transparent);
+  --paper-3:color-mix(in oklab, var(--ivory-200) 66%, transparent);
+  --paper-solid:var(--ivory-100);
+  --shadow-sm:var(--sh-contact);--shadow-md:var(--sh-near);
+  --shadow-lg:var(--sh-far);--shadow-xl:var(--sh-lift);
+  --shadow-modal:0 34px 90px -20px color-mix(in oklab, var(--shadow) 86%, transparent), 0 4px 0 color-mix(in oklab, var(--void) 70%, transparent);
+  --font-display:var(--serif);--font-ui:var(--sans);
+  --label-size:var(--fs-label);--label-tracking:var(--track-label);
+  --shelf-w:var(--case-w);--pad:var(--s-5);--radius:var(--r-sm);
+  /* -- Book button, ported from bookbutton.html. Its literal colours are
+     mapped onto the nearest ./colors steps so theme:check still holds:
+     the leather gradient becomes wine-800 into wine-950, the gold foil
+     becomes gold-300, the paper becomes ivory-50, and the page line is
+     ivory-200 darkened with gold-800. */
+  --book-h:44px;--book-spine-w:8px;--book-min-w:124px;
+  --book-leather-1:var(--wine-800);--book-leather-2:var(--wine-950);
+  --book-spine-bg:var(--wine-950);
+  --book-foil:var(--gold-300);
+  --book-paper:var(--ivory-50);
+  --book-paper-line:color-mix(in oklab, var(--ivory-200) 62%, var(--gold-800));
+  --book-crack:-38deg;--book-open:-130deg;--book-perspective:900px;
+  --radius-card:10px;--radius-pill:999px;
+  --shadow-card:0 12px 30px -14px color-mix(in oklab, var(--shadow) 92%, transparent);
+  --radius-book:0 var(--r-fore) var(--r-fore) 0;--spine-hinge:var(--hinge-in);
+  --ease:var(--ease-open);--ease-page:var(--ease-open);
+  --book-open-angle:var(--board-open-angle);
+  --book-open-duration:var(--t-open);--book-close-duration:var(--t-shut);
+}
+
+@property --board-open{syntax:"<angle>";inherits:true;initial-value:0deg}
+@property --board-lit{syntax:"<color>";inherits:true;initial-value:#7b1f1e}
+@property --board-face{syntax:"<color>";inherits:true;initial-value:#631918}
+@property --board-shade{syntax:"<color>";inherits:true;initial-value:#521514}
+@property --gutter-w{syntax:"<length>";inherits:true;initial-value:3px}
+@property --leaf-pitch{syntax:"<length>";inherits:true;initial-value:2px}
+@property --sheen{syntax:"<percentage>";inherits:true;initial-value:34%}
+@property --lamp{syntax:"<percentage>";inherits:true;initial-value:9%}
+@property --board-clip{syntax:"<length>";inherits:true;initial-value:0px}

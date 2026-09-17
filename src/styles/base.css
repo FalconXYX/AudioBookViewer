@@ -1,0 +1,262 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+button:disabled { cursor: default; opacity: 0.4; }
+
+input, select {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.65rem;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection { background: var(--accent-soft); }
+
+/* =============================================================================
+   Buttons are books.  Ported from bookbutton.html.
+
+   The geometry is the point: the spine is the left EDGE of the object and the
+   cover is hinged on it, so you are looking at one coherent book rather than a
+   spine drawn beside a cover.
+
+   Idle    the closed cover, gold-tooled, with the page deck showing at the
+           fore-edge and foot.
+   Hover   the cover cracks open on the hinge, revealing the first leaf.
+   Press   the cover swings fully open and the pages riffle past in sequence,
+           settle, then the cover falls shut.
+
+   Width is not fixed as it is in the prototype: .btn__sizer carries the label
+   in normal flow to give the button its intrinsic width, while the visible
+   label rides on the cover, which must be absolutely positioned to live in the
+   3D space.
+   ========================================================================== */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: var(--book-min-w);
+  height: var(--book-h);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  perspective: var(--book-perspective);
+  user-select: none;
+}
+.btn:disabled { cursor: default; opacity: 0.45; }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 4px; }
+
+/* Reserves the label's width; never painted. */
+.btn__sizer {
+  visibility: hidden;
+  padding: 0 1.15rem 0 calc(var(--book-spine-w) + 1.15rem);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.btn__book, .btn__book * { pointer-events: none; }
+.btn__book {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+}
+
+/* The spine, with raised bands. */
+.btn__spine {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: var(--book-spine-w);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  background: var(--book-spine-bg);
+  border-radius: 3px 0 0 3px;
+  box-shadow: inset -1px 0 2px color-mix(in oklab, var(--shadow) 70%, transparent);
+}
+.btn__rib { width: 100%; height: 2px; background: color-mix(in oklab, var(--book-foil) 40%, transparent); }
+
+/* The page deck at the fore-edge and foot. */
+.btn__deck {
+  position: absolute;
+  inset: 2px 2px 2px var(--book-spine-w);
+  z-index: 1;
+  background: var(--book-paper);
+  border-radius: 0 4px 4px 0;
+  box-shadow:
+    1px 0 0 var(--book-paper-line), 2px 0 0 var(--book-paper),
+    3px 0 0 var(--book-paper-line), 4px 0 0 var(--book-paper),
+    5px 0 0 var(--book-paper-line), 6px 0 0 var(--book-paper),
+    7px 0 0 var(--book-paper-line),
+    8px 2px 6px color-mix(in oklab, var(--shadow) 26%, transparent);
+}
+.btn__rim {
+  position: absolute; top: 2px; bottom: 2px; right: 0;
+  background: var(--book-paper);
+  border-left: 1px solid var(--book-paper-line);
+  border-radius: 0 3px 3px 0;
+}
+.btn__rim--1 { width: calc(100% - var(--book-spine-w) - 3px); z-index: 2; }
+.btn__rim--2 { width: calc(100% - var(--book-spine-w) - 6px); z-index: 3; }
+
+/* Every sheet, and the cover, share this geometry. */
+.btn__leaf {
+  position: absolute;
+  inset: 1px 1px 1px var(--book-spine-w);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 4px 4px 0;
+  background: var(--book-paper);
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+.btn__leaf--final { z-index: 4; transform: translateZ(1px); }
+.btn__riffle { display: none; box-shadow: inset 5px 0 8px color-mix(in oklab, var(--shadow) 10%, transparent); }
+.btn__riffle--5 { z-index: 5; transform: translateZ(2px); }
+.btn__riffle--4 { z-index: 6; transform: translateZ(3px); }
+.btn__riffle--3 { z-index: 7; transform: translateZ(4px); }
+.btn__riffle--2 { z-index: 8; transform: translateZ(5px); }
+.btn__riffle--1 { z-index: 9; transform: translateZ(6px); }
+.btn__leaf--preview { z-index: 10; transform: translateZ(7px); }
+.btn__page-text {
+  font-family: var(--font-display);
+  font-size: 12px; font-style: italic; font-weight: 600;
+  color: var(--wine-950);
+  letter-spacing: 0.4px;
+}
+
+/* The cover. */
+.btn__cover {
+  inset: 0 0 0 var(--book-spine-w);
+  z-index: 12;
+  transform: translateZ(8px);
+  background: linear-gradient(135deg, var(--book-leather-1) 0%, var(--book-leather-2) 100%);
+  box-shadow: 2px 2px 6px color-mix(in oklab, var(--shadow) 30%, transparent);
+  transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.25, 1),
+              box-shadow 0.26s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+.btn__tooling {
+  width: calc(100% - 10px); height: calc(100% - 8px);
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid color-mix(in oklab, var(--book-foil) 45%, transparent);
+  border-radius: 0 3px 3px 0;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--shadow) 28%, transparent);
+}
+.btn__label {
+  font-family: var(--font-ui);
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.6px; text-transform: uppercase;
+  color: var(--book-foil);
+  text-shadow: 0 1px 2px color-mix(in oklab, var(--shadow) 72%, transparent);
+  white-space: nowrap;
+}
+
+/* Hover: the cover cracks open. */
+.btn:not([data-phase]):not(:disabled):hover .btn__cover {
+  transform: translateZ(8px) rotateY(var(--book-crack));
+  box-shadow: -5px 3px 10px color-mix(in oklab, var(--shadow) 30%, transparent);
+}
+
+/* Press: the cover swings open and the pages riffle past. */
+.btn[data-phase='riffling'] .btn__cover { animation: book-open 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.btn[data-phase='riffling'] .btn__leaf--preview { animation: book-page 0.38s 0.03s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.btn[data-phase='riffling'] .btn__riffle { display: flex; }
+.btn[data-phase='riffling'] .btn__riffle--1 { animation: book-page 0.34s 0.06s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.btn[data-phase='riffling'] .btn__riffle--2 { animation: book-page 0.34s 0.10s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.btn[data-phase='riffling'] .btn__riffle--3 { animation: book-page 0.34s 0.14s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.btn[data-phase='riffling'] .btn__riffle--4 { animation: book-page 0.34s 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.btn[data-phase='riffling'] .btn__riffle--5 { animation: book-page 0.34s 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+.btn[data-phase='open'] .btn__cover { transform: translateZ(8px) rotateY(var(--book-open)); opacity: 0.9; }
+.btn[data-phase='open'] .btn__leaf--preview,
+.btn[data-phase='open'] .btn__riffle { display: none; }
+
+.btn[data-phase='closing'] .btn__cover { animation: book-close 0.34s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+.btn[data-phase='closing'] .btn__leaf--preview,
+.btn[data-phase='closing'] .btn__riffle { display: none; }
+
+@keyframes book-open {
+  0%   { transform: translateZ(8px) rotateY(var(--book-crack)); }
+  100% { transform: translateZ(8px) rotateY(var(--book-open)); opacity: 0.9; }
+}
+@keyframes book-page {
+  0%   { transform: translateZ(5px) rotateY(0deg); }
+  100% { transform: translateZ(5px) rotateY(-115deg); opacity: 0.12; }
+}
+@keyframes book-close {
+  0%   { transform: translateZ(8px) rotateY(var(--book-open)); opacity: 0.9; }
+  80%  { transform: translateZ(8px) rotateY(2deg); }
+  100% { transform: translateZ(8px) rotateY(0deg); opacity: 1; }
+}
+
+/* The one action that matters on a screen: bound in blue, not oxblood. */
+.btn--primary .btn__cover {
+  background: linear-gradient(135deg, var(--steel-700) 0%, var(--steel-900) 100%);
+}
+
+/* Secondary actions are not books — a book for Cancel would be noise. */
+.btn--pamphlet {
+  min-width: 0; height: auto; perspective: none;
+  padding: 0.38rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.btn--pamphlet .btn__book, .btn--pamphlet .btn__sizer { display: none; }
+.btn--pamphlet .btn__flat {
+  font-family: var(--font-ui); font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
+}
+.btn--pamphlet:hover:not(:disabled) { color: var(--text); border-color: var(--line-strong); }
+.btn--pamphlet:active:not(:disabled) { transform: translateY(1px); }
+
+.btn--sm { --book-h: 34px; --book-min-w: 96px; }
+.btn--sm .btn__label, .btn--sm .btn__sizer { font-size: 11px; }
+.btn--block { display: flex; width: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn__cover { transition: none; }
+  .btn[data-phase] .btn__cover,
+  .btn[data-phase] .btn__leaf { animation: none !important; }
+}

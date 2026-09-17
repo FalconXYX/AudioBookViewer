@@ -1,0 +1,36 @@
+{
+  "name": "audiobookviewer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "db:diff": "prisma migrate diff --from-schema prisma/schema.applied.prisma --to-schema prisma/schema.prisma --script",
+    "db:snapshot": "cp prisma/schema.prisma prisma/schema.applied.prisma",
+    "theme:check": "node scripts/theme-check.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.10.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "idb": "^8.0.0",
+    "music-metadata": "^11.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@types/wicg-file-system-access": "^2023.10.5",
+    "@vitejs/plugin-react": "^4.3.2",
+    "prisma": "^7.10.0",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  }
+}

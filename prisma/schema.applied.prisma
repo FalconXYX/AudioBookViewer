@@ -1,0 +1,174 @@
+// =============================================================================
+// Audiobook Viewer — schema source of truth.
+//
+// Prisma is used here for the SCHEMA and the TYPES, not at runtime. Prisma
+// Client cannot run in a browser (it needs a TCP connection to Postgres, which
+// browsers cannot open, and shipping a direct DB connection string to the
+// client would expose the database password to anyone who opens devtools).
+// The app talks to Supabase's REST API with the anon key, protected by RLS.
+//
+// So: `prisma migrate` owns the tables, `prisma generate` owns the TypeScript
+// types in src/types.ts, and supabase-js does the querying.
+//
+// Field names intentionally stay snake_case with no @map. supabase-js returns
+// raw column names over the wire, so camelCase Prisma fields would produce
+// types that do not describe the objects actually arriving at runtime.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+// Prisma 7 moved connection URLs out of the schema; see prisma.config.ts.
+datasource db {
+  provider = "postgresql"
+}
+
+/// How a book's audio is laid out on disk. Detected at scan time.
+enum SourceKind {
+  /// One audio file per chapter (the common case).
+  multi_file
+  /// One long file with embedded chapter markers (M4B, or MP3 with ID3 CHAP).
+  single_file_chapters
+  /// One long file, no markers; the whole book is a single chapter.
+  single_file
+
+  @@map("source_kind")
+}
+
+model Book {
+  id                 String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// References auth.users(id). Not a Prisma relation — the auth schema is
+  /// owned by Supabase; the foreign key is added in migration SQL instead.
+  user_id            String     @db.Uuid
+  title              String
+  author             String?
+  cover_url          String?
+  source_kind        SourceKind
+  /// Directory name chosen at scan time, shown to help re-find it on a new device.
+  folder_label       String
+  total_duration_sec Float      @default(0)
+  created_at         DateTime   @default(now()) @db.Timestamptz(6)
+  /// Maintained by the touch_updated_at trigger, not by Prisma's @updatedAt,
+  /// because writes go through supabase-js rather than Prisma Client.
+  updated_at         DateTime   @default(now()) @db.Timestamptz(6)
+
+  chapters       Chapter[]
+  progress       Progress?
+  bookmarks      Bookmark[]
+  device_sources DeviceSource[]
+  listening_days ListeningDay[]
+
+  @@index([user_id])
+  @@map("books")
+}
+
+/// One playable chapter. For a single file with embedded markers, every row
+/// shares file_name and differs by start_sec/end_sec.
+model Chapter {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  book_id         String  @db.Uuid
+  user_id         String  @db.Uuid
+  idx             Int
+  title           String
+  /// Path relative to the book's folder root, e.g. "Part 1/01 - Opening.mp3".
+  file_name       String
+  start_sec       Float   @default(0)
+  end_sec         Float?
+  duration_sec    Float   @default(0)
+  /// Cumulative seconds of all preceding chapters, so "time left in book" is O(1).
+  book_offset_sec Float   @default(0)
+
+  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@unique([book_id, idx])
+  @@index([book_id, idx])
+  @@map("chapters")
+}
+
+/// One row per book. This is what makes devices interchangeable.
+model Progress {
+  book_id           String   @id @db.Uuid
+  user_id           String   @db.Uuid
+  chapter_idx       Int      @default(0)
+  /// Offset within the chapter, not within the file.
+  position_sec      Float    @default(0)
+  /// Absolute offset from the start of the book; denormalized so the library
+  /// shelf can show time-remaining without joining chapters.
+  book_position_sec Float    @default(0)
+  updated_at        DateTime @default(now()) @db.Timestamptz(6)
+
+  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("progress")
+}
+
+model Bookmark {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  book_id      String   @db.Uuid
+  user_id      String   @db.Uuid
+  chapter_idx  Int
+  position_sec Float
+  label        String?
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@index([book_id])
+  @@map("bookmarks")
+}
+
+/// Records THAT a device has a book's folder wired up. The handle itself
+/// cannot be serialized, so it lives in IndexedDB on the device.
+model DeviceSource {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String   @db.Uuid
+  device_id        String
+  device_label     String
+  book_id          String   @db.Uuid
+  folder_label     String
+  last_verified_at DateTime @default(now()) @db.Timestamptz(6)
+
+  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@unique([device_id, book_id])
+  @@index([book_id])
+  @@map("device_sources")
+}
+
+/// Per-user preferences. One row per user, so they follow you between devices
+/// rather than living in a single browser's localStorage.
+model UserSettings {
+  user_id       String   @id @db.Uuid
+  /// When a chapter ends, roll straight into the next one.
+  autoplay_next Boolean  @default(true)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("user_settings")
+}
+
+/// Listening accumulated per book per day.
+///
+/// Progress only records WHERE you are, which is a position, not a history —
+/// it cannot answer "how much did I listen to last Tuesday". This table is the
+/// history: the player adds real elapsed seconds as they are played, so seeking
+/// around a book never inflates it.
+model ListeningDay {
+  user_id          String   @db.Uuid
+  book_id          String   @db.Uuid
+  /// The LOCAL calendar day as YYYY-MM-DD, deliberately text rather than a
+  /// date column: a date would be converted through a timezone somewhere
+  /// between the browser, PostgREST and Postgres, and listening at 11pm would
+  /// land on the wrong day. Text sorts correctly for this format anyway.
+  day              String
+  seconds_listened Int      @default(0)
+  updated_at       DateTime @default(now()) @db.Timestamptz(6)
+
+  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, book_id, day])
+  @@index([user_id, day])
+  @@map("listening_days")
+}
