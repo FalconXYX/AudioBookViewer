@@ -31,7 +31,10 @@ export function QuoteList({
           <ul className="quotes__list">
             {quotes.map((q) => {
               const chapter = q.chapter_idx !== null ? chapters?.[q.chapter_idx] : undefined
-              const placed = q.chapter_idx !== null && q.position_sec !== null
+              // Show where the quote STARTS, not where capture was pressed, so
+              // the printed time is the one "Play from here" actually goes to.
+              const startsAt = q.clip_start_sec ?? q.position_sec
+              const placed = q.chapter_idx !== null && startsAt !== null
               return (
                 <li key={q.id} className="quote">
                   <blockquote className="quote__text">{q.text}</blockquote>
@@ -51,7 +54,7 @@ export function QuoteList({
                     {!q.book_id && <span className="quote__src quote__src--loose">Not from the shelf</span>}
                     {placed && (
                       <span className="quote__at num">
-                        {chapter ? `${chapter.title} · ` : ''}{formatTime(q.position_sec!)}
+                        {chapter ? `${chapter.title} · ` : ''}{formatTime(startsAt!)}
                       </span>
                     )}
                     {q.transcribed && <span className="quote__tag">transcribed</span>}

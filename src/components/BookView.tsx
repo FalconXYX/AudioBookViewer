@@ -200,9 +200,14 @@ export function BookView({
             heading="Quotes from this book"
             emptyNote="Nothing kept from this book yet."
             onGoTo={(q) => {
-              if (q.chapter_idx === null || q.position_sec === null) return
+              // position_sec is where capture was PRESSED, which is the end of
+              // the quote — the window runs backwards from it. Going there
+              // plays the sentence after the one you wanted to hear again.
+              const from = q.clip_start_sec ?? q.position_sec
+              if (q.chapter_idx === null || from === null) return
               setImmersive(true)
-              void player.goToChapter(q.chapter_idx, q.position_sec, false)
+              // And "Play from here" should play. It was parking paused.
+              void player.goToChapter(q.chapter_idx, from, true)
             }}
             onRemove={onRemoveQuote}
           />
