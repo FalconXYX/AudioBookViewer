@@ -52,7 +52,10 @@ export function useAuth(): AuthState {
     clearOAuthErrorFromUrl()
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      // origin alone drops the base path: on Pages the app lives at
+      // /<repo>/, so signing in would return to the domain root and 404.
+      // BASE_URL is '/' in dev and the Pages base in a built site.
+      options: { redirectTo: new URL(import.meta.env.BASE_URL, window.location.origin).href },
     })
     // Callers invoke this from a click handler, so throwing here would become
     // an unhandled rejection and the button would look inert.
