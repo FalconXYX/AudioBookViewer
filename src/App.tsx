@@ -64,7 +64,6 @@ export default function App() {
                     </li>
                   ))}
                 </ul>
-                <div className="plank" />
               </div>
             </div>
           </nav>

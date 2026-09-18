@@ -637,30 +637,26 @@ input::placeholder { color: var(--text-faint); }
     inset 0 1px 0 color-mix(in oklab, var(--steel-300) 12%, transparent),
     14px 0 34px -22px var(--shadow);
 }
-.case__drawer { flex: 1; min-height: 0; overflow-y: auto; padding: 0 0 var(--s-4);
+.case__drawer { flex: 1; min-height: 0; overflow-y: auto; padding: var(--s-3) 0 var(--s-4);
   background-image: linear-gradient(180deg, var(--void) 0 9px, transparent 9px);
   box-shadow: inset 0 9px 13px -12px var(--void); }
-.run { margin-bottom: var(--s-2); }
+/* The runs are ordered but no longer separated. They had a brass label tab and
+   a plank between them; with the tabs removed the plank divided two groups the
+   reader could not name, and it kept reading as a gap however it was drawn. So
+   the case is now one continuous run of books, which is also what a shelf
+   actually looks like. */
+.run { margin-bottom: 0; }
 /* sticky, the way a divider behaves when you push the cards back */
 /* The runs are still grouped and still ordered, but they no longer announce
    themselves. A shelf does not label its own shelves. */
-.run__books { list-style: none; margin: 0; padding: var(--s-4) 0.6rem 0; display: flex;
+.run__books { list-style: none; margin: 0; padding: 0 0.6rem; display: flex;
   flex-direction: column; gap: 1px; background: var(--void);
   perspective: var(--spine-perspective); }
 .run__books > li { background: transparent; }
-.plank { position: relative; height: var(--plank-h);
-  background-image: var(--tex-oak),
-    linear-gradient(180deg, var(--plank-lit) 0 1px, var(--plank) 1px 52%,
-      var(--plank-mid) 52% 84%, var(--plank-deep) 84% 100%);
-  margin: 0 0.6rem var(--s-5); border-radius: 0 0 1px 1px;
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--plank-lit) 70%, transparent),
-    0 1px 0 var(--void), 0 12px 16px -12px var(--void); }
-.plank::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 5px;
-  background-image: var(--tex-felt), linear-gradient(180deg, var(--felt), var(--steel-950));
-  box-shadow: inset 0 2px 3px -2px var(--void); }
 
 .volume {
-  position: relative; display: block; width: 100%; min-height: var(--thick);
+  position: relative; display: block; width: 100%; min-height: 0;
+  padding-block: calc(0.5rem + var(--thick, 0px) / 2);
   /* The rule painted into the background sits at 30-35px: it is the joint
      between the spine and the front board. Text starting at 18px ran straight
      through it. Everything the eye reads now begins clear of the joint. */
@@ -1672,6 +1668,20 @@ input::placeholder { color: var(--text-faint); }
 .addbook__actions { display: flex; flex-wrap: wrap; align-items: center;
   gap: var(--s-3); margin-top: var(--s-6); }
 
+/* Stripping the inline styles off this screen took their spacing with it: the
+   paragraphs, the progress line and the alerts were all positioned by hand and
+   ended up flush against each other. Spaced properly here instead. */
+.addbook__inner p { margin: 0 0 var(--s-4); max-width: var(--measure); }
+.addbook__inner > .muted { margin-bottom: var(--s-5); }
+.addbook__inner .alert { margin: var(--s-5) 0; }
+.addbook__inner [aria-live] { margin-top: var(--s-5); }
+.addbook__inner .faint { font-size: var(--fs-micro); }
+.addbook__inner strong { color: var(--ink-bright); font-weight: 600; }
+.found summary { cursor: pointer; padding: var(--s-2) 0; }
+.found > p { margin: 0 0 var(--s-3); }
+.found:first-of-type { margin-top: var(--s-6); }
+.found:last-of-type { margin-bottom: 0; }
+
 .found {
   margin: var(--s-5) 0; padding: var(--s-5);
   border-radius: var(--radius-card);
@@ -1764,7 +1774,6 @@ input::placeholder { color: var(--text-faint); }
 :root[data-simple='on'] .modal::before { display: none; }            /* gilt headband*/
 :root[data-simple='on'] .plate::before { display: none; }
 :root[data-simple='on'] .sc--ruled::after { display: none; }         /* gilt rule    */
-:root[data-simple='on'] .plank::after { display: none; }             /* green felt   */
 :root[data-simple='on'] .colophon::before { display: none; }         /* fleuron      */
 :root[data-simple='on'] .board-cover::before { display: none; }      /* headband     */
 :root[data-simple='on'] .board-cover::after { display: none; }       /* photo corners*/
@@ -2033,14 +2042,6 @@ input::placeholder { color: var(--text-faint); }
   perspective: none;
 }
 /* the oak board between runs becomes a hairline divider */
-:root[data-simple='on'] .plank {
-  height: 1px;
-  margin: var(--s-3) var(--s-2) var(--s-3);
-  background-image: none;
-  background-color: var(--b-hair-lo);
-  border-radius: 0;
-  box-shadow: none;
-}
 /* a spine was a 38px cloth slab with a joint rule painted across it and a
    rotateX tip on hover. It is a row now: 3px binding rail, two lines of
    text, a 2px progress bar, and a surface step for hover and current. */
@@ -2052,8 +2053,9 @@ input::placeholder { color: var(--text-faint); }
      the spine survives as one crisp edge instead of a simulated leather
      gradient, and depth comes from a single soft shadow rather than four
      stacked insets. */
-  min-height: var(--thick);
-  padding: 0.5rem 0.75rem 0.55rem 1.15rem;
+  min-height: 0;
+  padding: calc(0.5rem + var(--thick, 0px) / 2) 0.75rem
+           calc(0.55rem + var(--thick, 0px) / 2) 1.15rem;
   border-radius: 2px var(--b-r2) var(--b-r2) 2px;
   background-color: var(--spine-tint, var(--leather-face));
   background-image:

@@ -52,7 +52,6 @@ export function Shelf({ books, loading, selectedId, query, onSelect, onAdd }: Pr
                   </li>
                 ))}
               </ul>
-              <div className="plank" aria-hidden="true" />
             </div>
           )
         })}

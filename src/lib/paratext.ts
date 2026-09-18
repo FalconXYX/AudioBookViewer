@@ -26,8 +26,17 @@ function hash(id: string): number {
   return h >>> 0
 }
 export const bindingFor = (id: string) => `var(--binding-${(hash(id) % BINDING_COUNT) + 1})`
-/** Board thickness, 32-50px, deterministic per book: a shelf has rhythm. */
-export const thicknessFor = (id: string) => `${32 + ((hash(id) >>> 7) % 19)}px`
+/**
+ * Extra board thickness, 0-6px, deterministic per book.
+ *
+ * This used to be a 32-50px min-height. A spine holds a title and an author
+ * and nothing else, so a book that hashed high got up to 20px of dead air
+ * under its text while its neighbour sat tight — read as broken spacing
+ * rather than as a thicker book. The height now comes from the content, and
+ * the thickness is a few pixels of padding on top: enough to give the shelf a
+ * rhythm, not enough to look like a mistake.
+ */
+export const thicknessFor = (id: string) => `${(hash(id) >>> 7) % 7}px`
 
 /** "A 04 / TOL" — a shelfmark, not a classification. It claims nothing it
  *  cannot keep: run letter, position in run, author's surname. */
