@@ -2002,38 +2002,62 @@ input::placeholder { color: var(--text-faint); }
    rotateX tip on hover. It is a row now: 3px binding rail, two lines of
    text, a 2px progress bar, and a surface step for hover and current. */
 :root[data-lift='on'] .volume {
-  min-height: 0;
-  padding: 0.5rem 0.6rem 0.55rem 0.9rem;
-  border-radius: var(--b-r2);
-  background-color: transparent;
-  background-image: none;
-  box-shadow: none;
+  /* The first pass set background-image, box-shadow and transform all to
+     none, which is how a shelf of books became a list of rows. A modern
+     treatment of a book is not the absence of a book — it is the same object
+     drawn with fewer tricks. So: the binding colour is kept as a flat fill,
+     the spine survives as one crisp edge instead of a simulated leather
+     gradient, and depth comes from a single soft shadow rather than four
+     stacked insets. */
+  min-height: var(--thick);
+  padding: 0.5rem 0.75rem 0.55rem 1.15rem;
+  border-radius: 2px var(--b-r2) var(--b-r2) 2px;
+  background-color: var(--spine-tint, var(--leather-face));
+  background-image:
+    linear-gradient(90deg,
+      color-mix(in oklab, var(--void) 62%, transparent) 0 3px,
+      color-mix(in oklab, var(--ivory-50) 10%, transparent) 3px 4px,
+      transparent 4px),
+    linear-gradient(161deg,
+      color-mix(in oklab, var(--ivory-50) 7%, transparent),
+      transparent 55%,
+      color-mix(in oklab, var(--void) 30%, transparent));
+  box-shadow: var(--b-sh1);
   transform: none;
-  overflow: visible;
-  transition: background-color var(--t-fast) var(--ease-settle),
-              box-shadow var(--t-fast) var(--ease-settle);
+  overflow: hidden;
+  transition: box-shadow var(--t-fast) var(--ease-settle),
+              translate var(--t-fast) var(--ease-settle);
 }
+/* the head- and tail-band at the spine, in the binding's own colour lifted
+   toward ivory — the one ornament kept, because it is what says "book" at a
+   glance and it costs a single element */
 :root[data-lift='on'] .volume::before {
-  left: 0.3rem; top: 0.55rem; bottom: 0.55rem;
-  width: 3px; border-radius: var(--radius-pill);
+  left: 0; top: 0; bottom: 0;
+  width: 3px; border-radius: 0;
   background-image: none;
-  background-color: color-mix(in oklab, var(--spine-tint, var(--wine-chosen)) 60%, var(--ivory-200));
+  background-color: color-mix(in oklab, var(--ivory-200) 46%, transparent);
   box-shadow: none;
-  opacity: 0.75;
+  opacity: 0.55;
   transition: opacity var(--t-fast) var(--ease-settle);
 }
+/* Hover and selection previously replaced the binding with a neutral grey,
+   which took the book away again the moment you touched it. The binding is
+   the book's identity; state is carried by lift and by an edge instead. */
 :root[data-lift='on'] .volume:hover {
   transform: none;
-  background-color: var(--b-s1);
-  box-shadow: none;
+  translate: 0 -1px;
+  box-shadow: var(--b-sh2);
 }
-:root[data-lift='on'] .volume:hover::before { opacity: 1; }
+:root[data-lift='on'] .volume:hover::before { opacity: 0.9; }
 :root[data-lift='on'] .volume[aria-current='true'] {
   transform: none;
-  background-color: var(--b-s2);
-  box-shadow: inset 0 0 0 1px var(--b-hair);
+  box-shadow: var(--b-sh2), inset 0 0 0 1px color-mix(in oklab, var(--ivory-50) 28%, transparent);
 }
-:root[data-lift='on'] .volume[aria-current='true']::before { opacity: 1; }
+:root[data-lift='on'] .volume[aria-current='true']::before {
+  opacity: 1;
+  background-color: var(--b-accent);
+  width: 4px;
+}
 :root[data-lift='on'] .volume__title {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
   overflow: hidden;
@@ -2792,10 +2816,33 @@ input::placeholder { color: var(--text-faint); }
 :root[data-lift='on'] :is(.btn__deck, .btn__leaf, .btn__rim, .btn__tooling) {
   border-radius: 0 var(--b-r1) var(--b-r1) 0;
 }
+/* The gilt frame ruled around every label is the single most dated thing on
+   the button — it is a Victorian binding convention, not a control. The book
+   survives without it; the frame does not survive being modern. */
 :root[data-lift='on'] .btn__tooling {
-  border-color: color-mix(in oklab, var(--book-foil) 34%, transparent);
+  border-color: transparent;
   box-shadow: none;
 }
+/* Seven stacked hairlines simulating a ream of paper, at 40px tall, resolve
+   into noise. One clean edge reads as a page block and nothing else. */
+:root[data-lift='on'] .btn__deck {
+  border-radius: 0 var(--b-r1) var(--b-r1) 0;
+  box-shadow:
+    2px 0 0 color-mix(in oklab, var(--book-paper-line) 70%, transparent),
+    4px 0 0 var(--book-paper),
+    5px 2px 8px -2px color-mix(in oklab, var(--b-shadow) 42%, transparent);
+}
+:root[data-lift='on'] .btn__rim--2 { display: none; }
+:root[data-lift='on'] .btn__rim--1 {
+  width: calc(100% - var(--book-spine-w) - 4px);
+  border-left-color: color-mix(in oklab, var(--book-paper-line) 55%, transparent);
+}
+/* No cover-gradient override here. `background-image` replaces the whole
+   layer, and the binding colours are set with the `background` shorthand — so
+   flattening the sheen this way silently stripped the plain and Quotes covers
+   to grey while Primary and Statistics survived only because their rules cascade
+   later. The covers already carry the modern radii and shadow; the leather is
+   worth more than the sheen. */
 :root[data-lift='on'] .btn__label {
   font-size: 12px; font-weight: 600;
   letter-spacing: 0.01em; text-transform: none;
