@@ -10,7 +10,7 @@ import { QuotesScreen } from './components/QuotesScreen'
 import { Stats } from './components/Stats'
 import { useAuth } from './hooks/useAuth'
 import { useLibrary } from './hooks/useLibrary'
-import { useLift } from './hooks/useLift'
+import { useSimpleMode } from './hooks/useSimpleMode'
 import { useQuotes } from './hooks/useQuotes'
 import { useSettings } from './hooks/useSettings'
 import { accessionNo } from './lib/paratext'
@@ -27,7 +27,7 @@ export default function App() {
   const library = useLibrary(auth.user)
   const settings = useSettings(auth.user)
   const quotes = useQuotes(auth.user)
-  const [lift, toggleLift] = useLift()
+  const [simple, toggleSimple] = useSimpleMode()
   const [view, setView] = useState<View>({ name: 'none' })
   const [query, setQuery] = useState('')
 
@@ -97,9 +97,16 @@ export default function App() {
         statsActive={view.name === 'stats'}
         onQuotes={() => setView(view.name === 'quotes' ? { name: 'none' } : { name: 'quotes' })}
         quotesActive={view.name === 'quotes'}
-        lift={lift}
-        onLift={toggleLift}
+        simple={simple}
+        onSimple={toggleSimple}
       />
+
+      {/* The switch changes the whole page at once. Without an announcement a
+          screen-reader user gets no confirmation that anything happened, and
+          the visual knob is no help. Polite, so it never interrupts. */}
+      <p className="sr-only" role="status" aria-live="polite">
+        {simple ? 'Simple mode on' : 'Simple mode off'}
+      </p>
 
       <Shelf
         books={library.books}

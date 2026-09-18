@@ -6,7 +6,7 @@ import type { Quote } from '@/types'
 import { useBookSource } from '@/hooks/useBookSource'
 import { useBookmarks } from '@/hooks/useBookmarks'
 import { useChapters } from '@/hooks/useChapters'
-import { useDocumentIcon } from '@/hooks/useDocumentIcon'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { usePlayer } from '@/hooks/usePlayer'
 import { useProgress } from '@/hooks/useProgress'
 import { formatDurationLong, formatTime } from '@/lib/format'
@@ -64,7 +64,7 @@ export function BookView({
     autoplayNext,
   })
 
-  useDocumentIcon(book.cover_url, book.title)
+  useDocumentTitle(book.title)
 
   useEffect(() => {
     setHeadSlot(document.getElementById('head-transport'))

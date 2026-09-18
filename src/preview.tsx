@@ -106,7 +106,8 @@ function Chrome({ children, openBook, shelf = books }:
       <Head
         books={shelf} openBook={openBook} where={openBook ? 'Chapter 3 of 9' : null}
         query="" onQuery={noop} email="parth@plato.so" onSignOut={noop}
-        onStats={noop}
+        onStats={noop} onQuotes={noop}
+        simple={document.documentElement.dataset.simple === 'on'} onSimple={noop}
       />
       <Shelf books={shelf} loading={false} selectedId={openBook?.id ?? null} query=""
              onSelect={noop} onAdd={noop} />

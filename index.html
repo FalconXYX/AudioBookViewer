@@ -3,14 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/src/assets/logo.png" />
     <title>Audiobook Viewer</title>
     <script>
       // Inline and blocking on purpose: reading this after mount would show a
       // frame of the wrong theme on every reload.
       try {
-        document.documentElement.dataset.lift =
-          localStorage.getItem('abv:lift') === 'on' ? 'on' : 'off';
-      } catch (e) { document.documentElement.dataset.lift = 'off'; }
+        document.documentElement.dataset.simple =
+          localStorage.getItem('abv:simple') === 'on' ? 'on' : 'off';
+      } catch (e) { document.documentElement.dataset.simple = 'off'; }
     </script>
   </head>
   <body>

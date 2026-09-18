@@ -14,8 +14,8 @@ interface Props {
   statsActive?: boolean;
   onQuotes?: () => void;
   quotesActive?: boolean;
-  lift?: boolean;
-  onLift?: () => void;
+  simple?: boolean;
+  onSimple?: () => void;
   onHome?: () => void;
 }
 const hours = (sec: number) => Math.round(sec / 3600);
@@ -32,8 +32,8 @@ export function Head({
   statsActive,
   onQuotes,
   quotesActive,
-  lift,
-  onLift,
+  simple,
+  onSimple,
   onHome,
 }: Props) {
   const total = books.reduce((n, b) => n + (b.total_duration_sec || 0), 0);
@@ -89,14 +89,26 @@ export function Head({
           <BookButton variant="stats" size="sm" onClick={onStats}
                       openLabel="Opening…" aria-pressed={statsActive}>Statistics</BookButton>
         )}
-        {/* A comparison switch while the palette is being settled, not a
-            permanent setting. 'L' does the same thing. */}
-        {onLift && (
-          <button type="button" className="lift-switch" onClick={onLift}
-                  aria-pressed={lift}
-                  title={`${lift ? 'Brighter' : 'Deeper'} — press L to compare`}>
-            <span className="lift-switch__track"><span className="lift-switch__knob" /></span>
-            <span className="lift-switch__label">{lift ? 'Brighter' : 'Deeper'}</span>
+        {/* role="switch" rather than a pressed button: this turns a mode on
+            and off, and a screen reader should say "on"/"off", not
+            "pressed". The label is a real element so it is both visible and
+            the accessible name, and the state is announced separately below
+            rather than being baked into the name — a name that changes as you
+            operate the control is disorienting. */}
+        {onSimple && (
+          <button
+            type="button"
+            className="simple-switch"
+            role="switch"
+            aria-checked={!!simple}
+            aria-keyshortcuts="l"
+            id="simple-mode-switch"
+            onClick={onSimple}
+          >
+            <span className="simple-switch__track" aria-hidden="true">
+              <span className="simple-switch__knob" />
+            </span>
+            <span className="simple-switch__label">Simple mode</span>
           </button>
         )}
         <div className="head__acct">

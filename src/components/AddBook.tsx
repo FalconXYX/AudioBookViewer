@@ -24,8 +24,8 @@ export function AddBook({ onSave, onCancel }: Props) {
 
   if (!supportsFileSystemAccess()) {
     return (
-      <div className="detail">
-        <div className="detail__inner">
+      <div className="addbook">
+        <div className="addbook__inner">
           <h2>Add a book</h2>
           <p className="alert" role="alert">
             This browser cannot open folders. Use Chrome or Edge on desktop.
@@ -37,17 +37,17 @@ export function AddBook({ onSave, onCancel }: Props) {
   }
 
   return (
-    <div className="detail">
-      <div className="detail__inner">
+    <div className="addbook">
+      <div className="addbook__inner">
         <h2>Add a book</h2>
 
         {!result && (
           <>
-            <p className="muted" style={{ maxWidth: '34rem' }}>
+            <p className="muted">
               Choose the folder holding the audio. Chapters, order, length and any embedded
               cover are read from the files themselves.
             </p>
-            <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.25rem' }}>
+            <div className="addbook__actions">
               <BookButton variant="primary" onClick={() => void scanner.scan()} disabled={scanner.scanning}>
                 {scanner.scanning ? 'Scanning…' : 'Choose folder'}
               </BookButton>
@@ -57,12 +57,12 @@ export function AddBook({ onSave, onCancel }: Props) {
         )}
 
         {scanner.progress && scanner.progress.phase !== 'done' && (
-          <p className="muted" aria-live="polite" style={{ marginTop: '1.5rem' }}>
+          <p className="muted" aria-live="polite">
             {scanner.progress.phase === 'listing'
               ? `Found ${scanner.progress.filesFound} files…`
               : `Reading tags ${scanner.progress.filesProcessed} / ${scanner.progress.filesFound}`}
             <br />
-            <span className="faint" style={{ fontSize: '0.8rem' }}>{scanner.progress.currentFile}</span>
+            <span className="faint">{scanner.progress.currentFile}</span>
           </p>
         )}
 
@@ -88,8 +88,8 @@ export function AddBook({ onSave, onCancel }: Props) {
               })()
             }}
           >
-            <p className="muted" style={{ marginTop: '0.5rem' }}>
-              <strong style={{ color: 'var(--text)' }}>{result.handle.name}</strong>
+            <p className="muted">
+              <strong>{result.handle.name}</strong>
               {' — '}
               {result.books.length === 1
                 ? 'one book'
@@ -112,39 +112,39 @@ export function AddBook({ onSave, onCancel }: Props) {
                   {book.chapters.length === 1 ? 'chapter' : 'chapters'},{' '}
                   {formatDurationLong(book.totalDurationSec)}
                   <br />
-                  <span className="faint" style={{ fontSize: '0.8rem' }}>
+                  <span className="faint">
                     {LAYOUT[book.sourceKind]}
                   </span>
                 </p>
 
                 <div className="found__fields">
                   <label>
-                    <span className="stat__k">Title</span>
+                    <span className="sc sc--cool">Title</span>
                     <input value={book.title} required
                       onChange={(e) => scanner.patchBook(i, { title: e.target.value })} />
                   </label>
                   <label>
-                    <span className="stat__k">Author</span>
+                    <span className="sc sc--cool">Author</span>
                     <input value={book.author ?? ''}
                       onChange={(e) => scanner.patchBook(i, { author: e.target.value || null })} />
                   </label>
                 </div>
 
                 <details>
-                  <summary className="muted" style={{ cursor: 'pointer' }}>
+                  <summary className="muted">
                     Check the chapter order ({book.chapters.length})
                   </summary>
-                  <ol className="chapters" style={{ marginTop: '0.75rem' }}>
+                  <ol className="found__toc">
                     {book.chapters.map((c) => (
                       <li key={c.idx}>
-                        <div style={{ display: 'flex', gap: '1rem', padding: '0.55rem 0.4rem', alignItems: 'baseline' }}>
-                          <span className="n">{c.idx + 1}</span>
-                          <span className="t">
+                        <div className="found__row">
+                          <span className="found__n">{c.idx + 1}</span>
+                          <span className="found__t">
                             {c.title}
                             <br />
-                            <span className="faint" style={{ fontSize: '0.75rem' }}>{c.file_name}</span>
+                            <span className="faint">{c.file_name}</span>
                           </span>
-                          <span className="d">{formatDurationLong(c.duration_sec)}</span>
+                          <span className="found__d">{formatDurationLong(c.duration_sec)}</span>
                         </div>
                       </li>
                     ))}
@@ -155,7 +155,7 @@ export function AddBook({ onSave, onCancel }: Props) {
 
             {saveError && <p className="alert" role="alert">{saveError}</p>}
 
-            <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.75rem' }}>
+            <div className="addbook__actions">
               <BookButton variant="primary" type="submit" disabled={saving}>
                 {saving ? 'Saving…' : result.books.length > 1 ? `Add ${result.books.length} books` : 'Add to shelf'}
               </BookButton>

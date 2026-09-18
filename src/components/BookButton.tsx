@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react'
+import { simpleModeActive } from '@/hooks/useSimpleMode'
 
 type Phase = 'riffling' | 'open' | 'closing'
 
@@ -54,9 +55,15 @@ export function BookButton({
   useEffect(() => clear, [clear])
 
   const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-    // A pamphlet has no animation to wait for, and someone who has asked for
-    // reduced motion should not be made to wait either.
-    if (variant === 'pamphlet' || reducedMotion()) { onClick?.(e); return }
+    // A pamphlet has no animation to wait for; someone who has asked for
+    // reduced motion should not be made to wait either; and in Simple mode
+    // nothing should sit between pressing a control and the result. A button
+    // that takes 1.12s to do anything, with no interim feedback, is read as
+    // broken by anyone who cannot see the cover turning.
+    if (variant === 'pamphlet' || reducedMotion() || simpleModeActive()) {
+      onClick?.(e)
+      return
+    }
     if (phase) return // already running; ignore the second press
 
     // React pools nothing in v17+, but the event is still reused by the time

@@ -265,7 +265,7 @@
 @property --board-clip{syntax:"<length>";inherits:true;initial-value:0px}
 
 /* ===========================================================================
-   MODERN — the second pitch, toggled with data-lift="on".
+   MODERN — the second pitch, toggled with data-simple="on".
 
    Two earlier attempts failed the same way. Both kept every surface in the
    app on the same warm ramp and argued only about how light it should be:
@@ -286,7 +286,7 @@
    whole app being a pastiche of a library. The skeuomorphism stays where it
    earns its keep and leaves the furniture alone.
    =========================================================================== */
-:root[data-lift='on'] {
+:root[data-simple='on'] {
   /* --- THE CHROME. The wine ramp's dark steps are what every large frame
          surface is painted with, so they are redirected to slate. Mixed toward
          ivory as well as lightened, because chroma is what made the earlier
@@ -350,7 +350,7 @@
 /* ===========================================================================
    THEME BLOCK — append to src/styles/theme.css (it must live there: it is
    token-only). Nothing here is a raw colour; every value is a mix of steps
-   already defined above. It comes AFTER the existing :root[data-lift='on']
+   already defined above. It comes AFTER the existing :root[data-simple='on']
    block and supersedes it.
 
    DIRECTION B — PRODUCT SURFACE.
@@ -362,7 +362,7 @@
    family, ambient-only shadows, a 4px grid, and controls sized like
    controls.
    ========================================================================= */
-:root[data-lift='on']{
+:root[data-simple='on']{
 
   /* --- 1. THE TWO MIXES EVERYTHING IS MADE OF ---------------------------
      GROUND is a warm near-neutral black: steel-950 carried toward gold-800
