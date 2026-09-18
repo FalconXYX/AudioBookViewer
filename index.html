@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Audiobook Viewer</title>
+    <script>
+      // Inline and blocking on purpose: reading this after mount would show a
+      // frame of the wrong theme on every reload.
+      try {
+        document.documentElement.dataset.lift =
+          localStorage.getItem('abv:lift') === 'on' ? 'on' : 'off';
+      } catch (e) { document.documentElement.dataset.lift = 'off'; }
+    </script>
   </head>
   <body>
     <div id="root"></div>

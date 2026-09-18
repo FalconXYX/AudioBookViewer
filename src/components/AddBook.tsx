@@ -74,60 +74,90 @@ export function AddBook({ onSave, onCancel }: Props) {
               e.preventDefault()
               setSaving(true)
               setSaveError(null)
-              void onSave(result.scanned, result.handle)
-                .catch((err) => setSaveError(err instanceof Error ? err.message : String(err)))
-                .finally(() => setSaving(false))
+              // Saved in sequence rather than in parallel: they share one
+              // directory handle and one device-source row per book, and a
+              // burst of concurrent writes is how duplicates appear.
+              void (async () => {
+                try {
+                  for (const book of result.books) await onSave(book, result.handle)
+                } catch (err) {
+                  setSaveError(err instanceof Error ? err.message : String(err))
+                } finally {
+                  setSaving(false)
+                }
+              })()
             }}
           >
             <p className="muted" style={{ marginTop: '0.5rem' }}>
-              <strong style={{ color: 'var(--text)' }}>{result.scanned.folderLabel}</strong>
-              {' — '}{result.scanned.chapters.length} chapters,{' '}
-              {formatDurationLong(result.scanned.totalDurationSec)}
-              <br />
-              <span className="faint" style={{ fontSize: '0.8rem' }}>
-                Detected layout: {LAYOUT[result.scanned.sourceKind]}
-              </span>
+              <strong style={{ color: 'var(--text)' }}>{result.handle.name}</strong>
+              {' — '}
+              {result.books.length === 1
+                ? 'one book'
+                : `${result.books.length} books found in this folder`}
             </p>
 
-            <div style={{ display: 'grid', gap: '0.9rem', maxWidth: '28rem', margin: '1.75rem 0' }}>
-              <label style={{ display: 'grid', gap: '0.3rem' }}>
-                <span className="stat__k">Title</span>
-                <input value={result.scanned.title} required
-                  onChange={(e) => scanner.patchResult({ title: e.target.value })} />
-              </label>
-              <label style={{ display: 'grid', gap: '0.3rem' }}>
-                <span className="stat__k">Author</span>
-                <input value={result.scanned.author ?? ''}
-                  onChange={(e) => scanner.patchResult({ author: e.target.value || null })} />
-              </label>
-            </div>
+            {result.books.map((book, i) => (
+              <section key={`${book.title}-${i}`} className="found">
+                <div className="found__head">
+                  <h3>{book.title || 'Untitled'}</h3>
+                  {result.books.length > 1 && (
+                    <BookButton variant="pamphlet" size="sm"
+                                onClick={() => scanner.dropBook(i)}>
+                      Not a book
+                    </BookButton>
+                  )}
+                </div>
+                <p className="muted">
+                  {book.chapters.length}{' '}
+                  {book.chapters.length === 1 ? 'chapter' : 'chapters'},{' '}
+                  {formatDurationLong(book.totalDurationSec)}
+                  <br />
+                  <span className="faint" style={{ fontSize: '0.8rem' }}>
+                    {LAYOUT[book.sourceKind]}
+                  </span>
+                </p>
 
-            <details>
-              <summary className="muted" style={{ cursor: 'pointer' }}>
-                Check the chapter order ({result.scanned.chapters.length})
-              </summary>
-              <ol className="chapters" style={{ marginTop: '0.75rem' }}>
-                {result.scanned.chapters.map((c) => (
-                  <li key={c.idx}>
-                    <div style={{ display: 'flex', gap: '1rem', padding: '0.55rem 0.4rem', alignItems: 'baseline' }}>
-                      <span className="n">{c.idx + 1}</span>
-                      <span className="t">
-                        {c.title}
-                        <br />
-                        <span className="faint" style={{ fontSize: '0.75rem' }}>{c.file_name}</span>
-                      </span>
-                      <span className="d">{formatDurationLong(c.duration_sec)}</span>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </details>
+                <div className="found__fields">
+                  <label>
+                    <span className="stat__k">Title</span>
+                    <input value={book.title} required
+                      onChange={(e) => scanner.patchBook(i, { title: e.target.value })} />
+                  </label>
+                  <label>
+                    <span className="stat__k">Author</span>
+                    <input value={book.author ?? ''}
+                      onChange={(e) => scanner.patchBook(i, { author: e.target.value || null })} />
+                  </label>
+                </div>
+
+                <details>
+                  <summary className="muted" style={{ cursor: 'pointer' }}>
+                    Check the chapter order ({book.chapters.length})
+                  </summary>
+                  <ol className="chapters" style={{ marginTop: '0.75rem' }}>
+                    {book.chapters.map((c) => (
+                      <li key={c.idx}>
+                        <div style={{ display: 'flex', gap: '1rem', padding: '0.55rem 0.4rem', alignItems: 'baseline' }}>
+                          <span className="n">{c.idx + 1}</span>
+                          <span className="t">
+                            {c.title}
+                            <br />
+                            <span className="faint" style={{ fontSize: '0.75rem' }}>{c.file_name}</span>
+                          </span>
+                          <span className="d">{formatDurationLong(c.duration_sec)}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              </section>
+            ))}
 
             {saveError && <p className="alert" role="alert">{saveError}</p>}
 
             <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.75rem' }}>
               <BookButton variant="primary" type="submit" disabled={saving}>
-                {saving ? 'Saving…' : 'Add to shelf'}
+                {saving ? 'Saving…' : result.books.length > 1 ? `Add ${result.books.length} books` : 'Add to shelf'}
               </BookButton>
               <BookButton variant="pamphlet" onClick={scanner.reset} disabled={saving}>
                 Pick a different folder

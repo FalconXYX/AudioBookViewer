@@ -1,5 +1,6 @@
 import { parseBlob, type IAudioMetadata, type IChapter } from 'music-metadata'
 import type { EmbeddedChapter, ScannedTrack } from '@/types'
+import { isMp4Family, readNeroChapters } from './mp4Chapters'
 
 export const AUDIO_EXTENSIONS = [
   '.mp3', '.m4a', '.m4b', '.mp4', '.aac',
@@ -126,6 +127,10 @@ export async function readTrackMetadata(
     })
   } catch {
     fallback.durationSec = await probeDurationViaAudio(file)
+    // A file music-metadata cannot parse at all may still carry a readable
+    // chapter list, and for an m4b that is the difference between a book and
+    // one ten-hour track.
+    if (isMp4Family(file.name)) fallback.chapters = await readNeroChapters(file)
     return fallback
   }
 
@@ -133,6 +138,15 @@ export async function readTrackMetadata(
     meta.format.duration && meta.format.duration > 0
       ? meta.format.duration
       : await probeDurationViaAudio(file)
+
+  // music-metadata reads only Apple-style chapter tracks. The Nero `chpl`
+  // atom, which a large share of m4b files use instead, is not implemented
+  // there at all — so when it finds nothing, look for that before concluding
+  // the book has no chapters.
+  let chapters = normalizeChapters(meta.format.chapters)
+  if (!chapters && isMp4Family(file.name)) {
+    chapters = await readNeroChapters(file)
+  }
 
   return {
     fileName: relativePath,
@@ -142,7 +156,7 @@ export async function readTrackMetadata(
     durationSec,
     album: meta.common.album?.trim() || null,
     artist: meta.common.artist?.trim() || meta.common.albumartist?.trim() || null,
-    chapters: normalizeChapters(meta.format.chapters),
+    chapters,
     coverBlob: pickCover(meta),
     sizeBytes: file.size,
   }

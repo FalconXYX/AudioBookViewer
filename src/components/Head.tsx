@@ -14,6 +14,8 @@ interface Props {
   statsActive?: boolean;
   onQuotes?: () => void;
   quotesActive?: boolean;
+  lift?: boolean;
+  onLift?: () => void;
   onHome?: () => void;
 }
 const hours = (sec: number) => Math.round(sec / 3600);
@@ -30,6 +32,8 @@ export function Head({
   statsActive,
   onQuotes,
   quotesActive,
+  lift,
+  onLift,
   onHome,
 }: Props) {
   const total = books.reduce((n, b) => n + (b.total_duration_sec || 0), 0);
@@ -84,6 +88,16 @@ export function Head({
         {onStats && (
           <BookButton variant="stats" size="sm" onClick={onStats}
                       openLabel="Opening…" aria-pressed={statsActive}>Statistics</BookButton>
+        )}
+        {/* A comparison switch while the palette is being settled, not a
+            permanent setting. 'L' does the same thing. */}
+        {onLift && (
+          <button type="button" className="lift-switch" onClick={onLift}
+                  aria-pressed={lift}
+                  title={`${lift ? 'Brighter' : 'Deeper'} — press L to compare`}>
+            <span className="lift-switch__track"><span className="lift-switch__knob" /></span>
+            <span className="lift-switch__label">{lift ? 'Brighter' : 'Deeper'}</span>
+          </button>
         )}
         <div className="head__acct">
           <span title={email}>{email}</span>

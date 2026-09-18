@@ -1,5 +1,5 @@
 import type { NewChapter, ScanProgress, ScannedBook, ScannedTrack, SourceKind } from '@/types'
-import { isAudioFile, readTrackMetadata } from './metadata'
+import { isAudioFile, readTrackMetadata, stripExtension } from './metadata'
 import { naturalCompare } from './naturalSort'
 
 export function supportsFileSystemAccess(): boolean {
@@ -187,18 +187,87 @@ function modeOf(values: Array<string | null>): string | null {
   return best
 }
 
-/** Scan a picked folder into a complete, unsaved book. */
-export async function scanBookFolder(
+/**
+ * Split the files found under one picked folder into separate books.
+ *
+ * An .m4b IS a complete audiobook — that is what the container means — so each
+ * one is its own book rather than a chapter of a larger one. Without this rule
+ * a folder holding a trilogy as three .m4b files imports as a single book with
+ * three enormous "chapters", and the only way out is to put every volume in
+ * its own folder and pick them one at a time.
+ *
+ * Everything else keeps the old behaviour and groups by the folder it sits in,
+ * because loose .mp3 files in a directory really are the chapters of one book.
+ * Grouping by the immediate parent rather than by the root also means a folder
+ * of per-book subfolders imports as one book each.
+ */
+export function groupIntoBooks(tracks: ScannedTrack[]): ScannedTrack[][] {
+  const solo: ScannedTrack[][] = []
+  const byDir = new Map<string, ScannedTrack[]>()
+
+  for (const t of tracks) {
+    if (/\.m4b$/i.test(t.fileName)) {
+      solo.push([t])
+      continue
+    }
+    const d = dirOf(t.fileName)
+    const bucket = byDir.get(d)
+    if (bucket) bucket.push(t)
+    else byDir.set(d, [t])
+  }
+
+  const grouped = [...byDir.keys()]
+    .sort(naturalCompare)
+    .map((d) => byDir.get(d)!)
+
+  return [...grouped, ...solo].filter((g) => g.length > 0)
+}
+
+/** The last path segment, used to name a book after the folder holding it. */
+function lastSegment(path: string): string {
+  const parts = path.split('/').filter(Boolean)
+  return parts[parts.length - 1] ?? ''
+}
+
+function titleFor(group: ScannedTrack[], rootName: string): string {
+  const album = modeOf(group.map((t) => t.album))
+  if (album) return album
+  // A lone file names itself; a directory of files is named by the directory.
+  if (group.length === 1) {
+    const t = group[0]
+    return t.title?.trim() || stripExtension(lastSegment(t.fileName))
+  }
+  const dir = dirOf(group[0].fileName)
+  return dir ? lastSegment(dir) : rootName
+}
+
+function assemble(group: ScannedTrack[], root: FileSystemDirectoryHandle): ScannedBook {
+  const ordered = orderTracks(group)
+  const chapters = buildChapters(ordered)
+  return {
+    title: titleFor(ordered, root.name),
+    author: modeOf(ordered.map((t) => t.artist)),
+    sourceKind: detectSourceKind(ordered),
+    folderLabel: root.name,
+    totalDurationSec: chapters.reduce((sum, c) => sum + c.duration_sec, 0),
+    coverBlob: ordered.find((t) => t.coverBlob)?.coverBlob ?? null,
+    chapters,
+  }
+}
+
+/**
+ * Scan a picked folder into one or more complete, unsaved books.
+ * Ordered largest first, so the main title of a set leads the confirmation.
+ */
+export async function scanBooksInFolder(
   root: FileSystemDirectoryHandle,
   onProgress?: (p: ScanProgress) => void,
-): Promise<ScannedBook> {
+): Promise<ScannedBook[]> {
   const files = await walkAudioFiles(root, onProgress)
   if (files.length === 0) {
     throw new Error(`No audio files found in "${root.name}".`)
   }
 
-  // Natural-sort up front so tag reading (and its progress display) runs in
-  // roughly the order the user expects.
   files.sort((a, b) => naturalCompare(a.path, b.path))
 
   const tracks: ScannedTrack[] = []
@@ -212,10 +281,6 @@ export async function scanBookFolder(
     tracks.push(await readTrackMetadata(files[i].file, files[i].path))
   }
 
-  const ordered = orderTracks(tracks)
-  const chapters = buildChapters(ordered)
-  const totalDurationSec = chapters.reduce((sum, c) => sum + c.duration_sec, 0)
-
   onProgress?.({
     phase: 'done',
     filesFound: files.length,
@@ -223,13 +288,8 @@ export async function scanBookFolder(
     currentFile: null,
   })
 
-  return {
-    title: modeOf(ordered.map((t) => t.album)) ?? root.name,
-    author: modeOf(ordered.map((t) => t.artist)),
-    sourceKind: detectSourceKind(ordered),
-    folderLabel: root.name,
-    totalDurationSec,
-    coverBlob: ordered.find((t) => t.coverBlob)?.coverBlob ?? null,
-    chapters,
-  }
+  return groupIntoBooks(tracks)
+    .map((g) => assemble(g, root))
+    .filter((b) => b.chapters.length > 0)
+    .sort((a, b) => b.totalDurationSec - a.totalDurationSec)
 }

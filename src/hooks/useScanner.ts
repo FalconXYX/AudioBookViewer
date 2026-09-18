@@ -1,9 +1,10 @@
 import { useCallback, useState } from 'react'
 import type { ScanProgress, ScannedBook } from '@/types'
-import { pickBookFolder, scanBookFolder } from '@/lib/scanner'
+import { pickBookFolder, scanBooksInFolder } from '@/lib/scanner'
 
 export interface ScanResult {
-  scanned: ScannedBook
+  /** One entry per book found. A folder of .m4b files yields several. */
+  books: ScannedBook[]
   handle: FileSystemDirectoryHandle
 }
 
@@ -15,8 +16,10 @@ export interface ScannerState {
   /** Opens the folder picker and scans. Call from a click handler. */
   scan: () => Promise<void>
   reset: () => void
-  /** Edit the scan before saving it (fix a wrong title, drop a chapter, ...). */
-  patchResult: (patch: Partial<ScannedBook>) => void
+  /** Edit one of the found books before saving (fix a wrong title, ...). */
+  patchBook: (index: number, patch: Partial<ScannedBook>) => void
+  /** Drop a book from the set before saving — a folder can turn up strays. */
+  dropBook: (index: number) => void
 }
 
 export function useScanner(): ScannerState {
@@ -34,8 +37,8 @@ export function useScanner(): ScannerState {
 
       setScanning(true)
       setProgress(null)
-      const scanned = await scanBookFolder(handle, setProgress)
-      setResult({ scanned, handle })
+      const books = await scanBooksInFolder(handle, setProgress)
+      setResult({ books, handle })
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     } finally {
@@ -49,9 +52,17 @@ export function useScanner(): ScannerState {
     setError(null)
   }, [])
 
-  const patchResult = useCallback((patch: Partial<ScannedBook>) => {
-    setResult((prev) => (prev ? { ...prev, scanned: { ...prev.scanned, ...patch } } : prev))
+  const patchBook = useCallback((index: number, patch: Partial<ScannedBook>) => {
+    setResult((prev) => prev
+      ? { ...prev, books: prev.books.map((b, i) => (i === index ? { ...b, ...patch } : b)) }
+      : prev)
   }, [])
 
-  return { scanning, progress, result, error, scan, reset, patchResult }
+  const dropBook = useCallback((index: number) => {
+    setResult((prev) => prev
+      ? { ...prev, books: prev.books.filter((_, i) => i !== index) }
+      : prev)
+  }, [])
+
+  return { scanning, progress, result, error, scan, reset, patchBook, dropBook }
 }

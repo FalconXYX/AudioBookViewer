@@ -51,6 +51,9 @@
   --brass-mid:var(--gold-700);--brass-lo:var(--gold-800);
 
   /* 4. BINDING CLOTH AND BOARDS ------------------------------------------ */
+  --leather-face:var(--wine-chosen);--leather-hi:var(--wine-700);
+  --leather-lo:var(--wine-800);--leather-deep:var(--wine-900);
+  --leather-edge:var(--wine-950);
   --board:var(--wine-chosen);--board-hi:var(--wine-700);--board-lo:var(--wine-800);
   --board-edge:var(--wine-950);--hinge:var(--wine-900);
 
@@ -260,3 +263,272 @@
 @property --sheen{syntax:"<percentage>";inherits:true;initial-value:34%}
 @property --lamp{syntax:"<percentage>";inherits:true;initial-value:9%}
 @property --board-clip{syntax:"<length>";inherits:true;initial-value:0px}
+
+/* ===========================================================================
+   MODERN — the second pitch, toggled with data-lift="on".
+
+   Two earlier attempts failed the same way. Both kept every surface in the
+   app on the same warm ramp and argued only about how light it should be:
+   first wine against steel (two near-opposites, so lifting both made a
+   poster), then everything in oak (one hue everywhere, which reads as dated
+   because nothing in the last twenty years is upholstered in brown).
+
+   This one splits the app in two instead.
+
+   THE CHROME — desk, case, head, panels — goes neutral dark slate. Almost no
+   chroma, a clear ladder of values, one crisp accent. That is what reads as
+   modern: restraint in the frame, not a different colour of wallpaper.
+
+   THE BOOKS — boards, spines, bindings, gilt — keep their leather and their
+   foil, restored below in app.css so the ramp override cannot reach them.
+
+   So the books become OBJECTS sitting on a modern surface, rather than the
+   whole app being a pastiche of a library. The skeuomorphism stays where it
+   earns its keep and leaves the furniture alone.
+   =========================================================================== */
+:root[data-lift='on'] {
+  /* --- THE CHROME. The wine ramp's dark steps are what every large frame
+         surface is painted with, so they are redirected to slate. Mixed toward
+         ivory as well as lightened, because chroma is what made the earlier
+         attempts shout. --- */
+  --wine-950: color-mix(in oklab, #08131b 92%, #fcf6e8 8%);
+  --wine-900: color-mix(in oklab, #0c1b27 86%, #fcf6e8 11%);
+  --wine-800: color-mix(in oklab, #17364f 74%, #fcf6e8 13%);
+
+  /* the deepest neutral: grooves, gutters and recesses */
+  --void: color-mix(in oklab, #08131b 94%, #fcf6e8 4%);
+
+  /* the case, a clear step off the desk rather than a different hue from it */
+  --case:      color-mix(in oklab, #0c1b27 84%, #fcf6e8 12%);
+  --case-back: color-mix(in oklab, #08131b 90%, #fcf6e8 7%);
+  --case-lip:  color-mix(in oklab, #17364f 76%, #fcf6e8 16%);
+  --felt:      color-mix(in oklab, #0c1b27 88%, #fcf6e8 8%);
+
+  /* panels and long-form sheets: neutral, one rung up from the desk */
+  --sheet:      color-mix(in oklab, #17364f 70%, #fcf6e8 14%);
+  --sheet-lit:  color-mix(in oklab, #235176 68%, #fcf6e8 18%);
+  --sheet-deep: color-mix(in oklab, #0c1b27 86%, #fcf6e8 9%);
+
+  /* the head rail loses its brass and becomes part of the frame */
+  --gold-950: color-mix(in oklab, #08131b 92%, #fcf6e8 7%);
+  --gold-900: color-mix(in oklab, #0c1b27 84%, #fcf6e8 12%);
+
+  /* --- THE ACCENT. One, and it is the clean blue the brief asked for, used
+         on state and nothing else. --- */
+  --accent-core: #0b9bf4;
+  --accent-hi:   #3caff6;
+  --accent-alpha: 18%;
+
+  /* --- INK. Near-white primary, a neutral light grey for secondary. The old
+         secondary was steel-300, a blue-grey that tinted every caption. --- */
+  --ink-cool: color-mix(in oklab, #d8e7f3 58%, #fcf6e8 42%);
+  --ink-dim-alpha: 78%;
+  --ink-faint-alpha: 54%;
+
+  /* --- edges carry the structure once the surfaces stop shouting --- */
+  --line-alpha: 14%;
+  --line-strong-alpha: 26%;
+  --rule-gilt-alpha: 40%;
+
+  /* --- THE BOOKS. The ramp override above would have taken the boards and
+         spines to slate along with the furniture. These hold the original
+         wine so app.css can paint the book objects with it; they are set here
+         rather than left to the ramp because a custom property cannot survive
+         its own redirect. --- */
+  --leather-face: var(--wine-chosen);
+  --leather-hi:   #7b1f1e;
+  --leather-lo:   #521514;
+  --leather-deep: #290a0a;
+  --leather-edge: #1d0707;
+
+  /* --- radii: the one structural tell of a modern interface --- */
+  --r-sm: 4px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --radius-card: 14px;
+}
+/* ===========================================================================
+   THEME BLOCK — append to src/styles/theme.css (it must live there: it is
+   token-only). Nothing here is a raw colour; every value is a mix of steps
+   already defined above. It comes AFTER the existing :root[data-lift='on']
+   block and supersedes it.
+
+   DIRECTION B — PRODUCT SURFACE.
+
+   The two earlier variants argued about hue. This one stops arguing about
+   hue: the chrome is drained to chroma 0.008 (against the leather's 0.106
+   and the accent's 0.168, a 14x and 22x ratio) and every remaining modern
+   signal is carried by geometry — a six-step surface ladder, one radius
+   family, ambient-only shadows, a 4px grid, and controls sized like
+   controls.
+   ========================================================================= */
+:root[data-lift='on']{
+
+  /* --- 1. THE TWO MIXES EVERYTHING IS MADE OF ---------------------------
+     GROUND is a warm near-neutral black: steel-950 carried toward gold-800
+     and then a trace of the wine. Measured: oklab L 0.242, chroma 0.007, hue
+     67 degrees. Warm enough that it is not grey, colourless enough that it
+     never competes with a binding.
+     TINT is the near-neutral light used to raise it: ivory-50 pulled halfway
+     to steel-100 so the ramp does not turn sepia as it lightens. --------- */
+  --b-ground: color-mix(in oklab,
+                color-mix(in oklab, var(--steel-950) 75%, var(--gold-800)) 93%,
+                var(--wine-chosen));
+  --b-tint:   color-mix(in oklab, var(--ivory-50) 62%, var(--steel-100));
+
+  /* --- 2. THE SURFACE LADDER. Six rungs, ~0.035 oklab L apart: close
+     enough to read as one material, far enough that a card never needs a
+     border to be found. sunken is the only cool rung — recesses are cool.
+     Resolved: L 0.215 / 0.242 / 0.278 / 0.310 / 0.341 / 0.384, chroma 0.006
+     to 0.008 throughout, hue 67-85 degrees. ---------------------------- */
+  --b-sunken: color-mix(in oklab, var(--b-ground) 56%, var(--steel-950));
+  --b-base:   var(--b-ground);
+  --b-s1:     color-mix(in oklab, var(--b-ground) 95%,   var(--b-tint));
+  --b-s2:     color-mix(in oklab, var(--b-ground) 90.5%, var(--b-tint));
+  --b-s3:     color-mix(in oklab, var(--b-ground) 86%,   var(--b-tint));
+  --b-s4:     color-mix(in oklab, var(--b-ground) 80%,   var(--b-tint));
+
+  /* --- 3. HAIRLINES. They define, they do not structure. --------------- */
+  --b-hair-lo: color-mix(in oklab, var(--ivory-50)  5%, transparent);
+  --b-hair:    color-mix(in oklab, var(--ivory-50)  9%, transparent);
+  --b-hair-hi: color-mix(in oklab, var(--ivory-50) 16%, transparent);
+
+  /* --- 4. INK. Three weights, no fourth. ------------------------------- */
+  --b-ink:       var(--ivory-50);                                          /* 15.2:1 on base */
+  --b-ink-dim:   color-mix(in oklab, var(--ivory-100) 80%, transparent);   /*  9.6:1 */
+  --b-ink-faint: color-mix(in oklab, var(--ivory-100) 56%, transparent);   /*  5.4:1 */
+
+  /* --- 5. ONE ACCENT, and it only ever means state: focus, playing,
+     current chapter, progress, selection. Never decoration. ------------- */
+  --b-accent:      var(--azure-500);
+  --b-accent-hi:   var(--azure-400);
+  --b-accent-text: var(--azure-400);   /* 5.4:1 on a card; the 500 is 4.4 */
+  --b-on-accent:   color-mix(in oklab, var(--steel-950) 84%, var(--azure-900));
+
+  /* --- 6. RADII. One family on a 4px grid. The default theme's 2/4/7
+     is the single loudest "made in 2009" tell in the app. --------------- */
+  --b-r1:  6px;   /* chips, kbd, small fields   */
+  --b-r2: 10px;   /* controls, inputs, rows     */
+  --b-r3: 14px;   /* cards                      */
+  --b-r4: 20px;   /* hero cards, sheets, modals */
+  --b-r5: 28px;
+
+  /* --- 7. SHADOWS. Ambient only. No contact line, no 0 1px 0, no bevel.
+     Four elevations, each a tight contact blur plus a wide diffuse one. -- */
+  --b-shadow: var(--steel-950);
+  --b-sh1: 0 1px 2px   color-mix(in oklab, var(--b-shadow) 44%, transparent),
+           0 2px 6px -2px  color-mix(in oklab, var(--b-shadow) 38%, transparent);
+  --b-sh2: 0 2px 4px -1px color-mix(in oklab, var(--b-shadow) 44%, transparent),
+           0 10px 24px -8px color-mix(in oklab, var(--b-shadow) 56%, transparent);
+  --b-sh3: 0 4px 8px -2px  color-mix(in oklab, var(--b-shadow) 46%, transparent),
+           0 24px 48px -14px color-mix(in oklab, var(--b-shadow) 64%, transparent);
+  --b-sh4: 0 8px 18px -6px color-mix(in oklab, var(--b-shadow) 52%, transparent),
+           0 56px 100px -28px color-mix(in oklab, var(--b-shadow) 74%, transparent);
+
+  /* --- 8. CONTROL GEOMETRY. Every control in the chrome is one of two
+     heights. Nothing is sized by accident any more. -------------------- */
+  --b-ctl-h:    2.125rem;   /* 34px — header controls, secondary buttons */
+  --b-ctl-h-lg: 2.5rem;     /* 40px — primary actions, transport studs   */
+  --b-gut:      1.5rem;
+
+  /* =====================================================================
+     THE REDIRECTS. Everything below points an existing token at the system
+     above, so a rule nobody restyled still lands on the ladder instead of
+     on wine. None of these reference a token that is itself redirected.
+     ===================================================================== */
+
+  /* the room */
+  --air: var(--b-base); --field: var(--b-base); --field-warm: var(--b-base);
+  --shadow: var(--b-shadow);
+  --void:      var(--b-sunken);
+  --wine-950:  var(--b-sunken);
+  --wine-900:  var(--b-base);
+  --wine-800:  var(--b-s2);
+  /* the head and the case are one L-shaped rail, a rung BELOW the desk */
+  --case: var(--b-sunken); --case-back: var(--b-sunken); --case-lip: var(--b-s1);
+  --felt: var(--b-s1);
+  --sheet: var(--b-s1); --sheet-lit: var(--b-s2); --sheet-deep: var(--b-base);
+  --gold-950: var(--b-sunken); --gold-900: var(--b-sunken);
+
+  /* the oak shelf boards and the brass become chrome, in one stroke */
+  --plank-lit: var(--b-hair); --plank: var(--b-s1);
+  --plank-mid: var(--b-s1);   --plank-deep: var(--b-base);
+  --brass-hi: var(--b-s4); --brass: var(--b-s3);
+  --brass-mid: var(--b-s2); --brass-lo: var(--b-s1);
+
+  /* there is no paper in this variant: the page tokens become surfaces and
+     ink, so every color-mix against --paper-ink resolves as light-on-dark */
+  --paper: var(--b-s1); --paper-bright: var(--b-s2); --paper-buff: var(--b-s1);
+  --paper-shade: var(--b-hair);
+  --paper-ink: var(--ivory-50);
+  --paper-ink-2: color-mix(in oklab, var(--steel-100) 66%, var(--ivory-50));
+  --paper-rule: var(--ivory-50);
+  --paper-red: var(--b-accent);
+  --stamp-green: var(--b-ink-faint); --stamp-blue: var(--b-ink-faint);
+  --stamp-red: var(--b-ink-faint);
+  --rule-paper: var(--b-hair); --rule-feint: var(--b-hair-lo);
+  --line: var(--b-hair); --line-strong: var(--b-hair-hi);
+  --rule: var(--b-hair); --rule-strong: var(--b-hair-hi);
+
+  /* the gilt is retired: labels, rules and tooling all go to ink or die */
+  --rule-gilt-alpha: 0%;
+  --gilt-pale: var(--b-ink);  --gilt-hi: var(--b-ink);
+  --gilt: var(--b-accent);    --gilt-mid: var(--b-accent);
+  --gilt-lo: var(--b-ink-faint);
+  --gilt-blind: var(--b-hair-lo); --gilt-deep: transparent;
+  --ink-gilt: var(--b-ink-dim);
+  --ink-cool: color-mix(in oklab, var(--steel-100) 60%, var(--ivory-50));
+  --ink-dim-alpha: 80%; --ink-faint-alpha: 56%;
+  --line-alpha: 9%; --line-strong-alpha: 16%;
+
+  /* state */
+  --accent-core: var(--b-accent); --accent-hi: var(--b-accent-hi);
+  --accent-navy: var(--azure-800); --accent-alpha: 16%;
+
+  /* bindings 3 and 9 pointed at --wine-800 and --gold-900, which the
+     redirect above turns into chrome; restated from steps it cannot reach
+     so all nine spines stay nine spines */
+  --binding-3: color-mix(in oklab, var(--wine-chosen) 70%, var(--steel-950));
+  --binding-9: color-mix(in oklab, var(--gold-800) 66%, var(--steel-950));
+
+  /* the BookButton's leather was pointed at --wine-800/--wine-950 too, so
+     in the previous variant the book was a grey slab with gold foil on it.
+     Restated the same way. The book is a book again. */
+  --book-leather-1: color-mix(in oklab, var(--wine-chosen) 78%, var(--wine-700));
+  --book-leather-2: color-mix(in oklab, var(--wine-chosen) 38%, var(--steel-950));
+  --book-spine-bg:  color-mix(in oklab, var(--wine-chosen) 30%, var(--steel-950));
+  --book-paper-line: color-mix(in oklab, var(--ivory-200) 62%, var(--gold-800));
+
+  /* --- 9. GEOMETRY. Tighter head, narrower case, one radius family. ---- */
+  --head-h: 3.5rem;
+  --case-w: 17.5rem;
+  --apparatus-w: 17.5rem;
+  --r-sm: var(--b-r1); --r-md: var(--b-r2); --r-lg: var(--b-r3);
+  --radius: var(--b-r1); --radius-card: var(--b-r3);
+  --shadow-card: var(--b-sh2);
+  --sh-contact: none;
+  --sh-near: var(--b-sh1); --sh-far: var(--b-sh2); --sh-lift: var(--b-sh3);
+  --sh-plate: var(--b-sh2); --sh-card: var(--b-sh1);
+  --sh-sunk: inset 0 0 0 1px var(--b-hair-lo);
+  --shadow-sm: none; --shadow-md: var(--b-sh1);
+  --shadow-lg: var(--b-sh2); --shadow-xl: var(--b-sh3);
+  --shadow-modal: var(--b-sh4);
+
+  /* --- 10. TYPE. Sans-led, tracking near zero, one real size ramp. The
+     default theme tracks labels at 0.14em and 0.22em, which is the second
+     loudest dated tell after the 2px radii. -------------------------- */
+  --track-label: 0.01em;
+  --track-wide:  0.06em;
+  --lh-tight: 1.14; --lh-text: 1.58;
+  --fs-title: clamp(1.875rem, 2.8vw, 2.5rem);
+  --fs-head:  1.5rem;
+  --fs-sub:   1.1875rem;
+  --fs-lead:  1rem;
+
+  /* --- 11. MOTION. Shorter, and one settle curve for state changes. --- */
+  --t-fast: 110ms; --t-med: 170ms; --t-open: 220ms; --t-shut: 180ms;
+  --ease-settle: cubic-bezier(0.2, 0.9, 0.25, 1);
+
+  /* --- 12. THE BOOK BUTTON: proportions only. It stays a book. -------- */
+  --book-h: 40px; --book-h-sm: 32px; --book-min-w: 116px; --book-spine-w: 7px;
+}

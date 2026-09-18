@@ -542,9 +542,11 @@ input::placeholder { color: var(--text-faint); }
   grid-area: head; position: relative; z-index: var(--z-head); display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center; gap: var(--s-5); padding: 0 var(--s-5) 0 var(--s-5);
+  /* A 1px vertical hairline every 9px used to run the full width of this bar.
+     It read as ruled lines across the header, and it is the last of the
+     hatches — the transport, the gauge, the scrub and the shelf spines have
+     all lost theirs. The brass rail at the foot carries the edge on its own. */
   background-image:
-    repeating-linear-gradient(90deg,
-      color-mix(in oklab, var(--void) 18%, transparent) 0 1px, transparent 1px 9px),
     linear-gradient(180deg, var(--gold-900) 0%, var(--gold-950) 62%, var(--wine-950) 100%);
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--brass-mid) 45%, transparent),
               0 10px 24px -14px var(--shadow);
@@ -1589,3 +1591,1271 @@ input::placeholder { color: var(--text-faint); }
    does not move the playhead */
 .tbtn--quote { margin-left: 0.35rem; }
 .tbtn--quote svg { width: 1.25rem; height: 1.25rem; }
+
+/* ---------- 14. THE LIFT SWITCH ----------
+   A brass toggle in the head, for comparing the two depths side by side while
+   the palette is being settled. It is deliberately small and unlabelled beyond
+   one word: it is scaffolding, not a feature. */
+.lift-switch {
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.22rem 0.5rem 0.22rem 0.3rem; border: 0;
+  border-radius: var(--radius-pill); cursor: pointer;
+  background: color-mix(in oklab, var(--void) 45%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--gilt-blind) 42%, transparent);
+  transition: box-shadow var(--t-fast) var(--ease-open);
+}
+.lift-switch:hover { box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--gilt) 55%, transparent); }
+.lift-switch__track {
+  position: relative; width: 26px; height: 14px; flex: none;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--void) 80%, transparent);
+  box-shadow: inset 0 1px 2px color-mix(in oklab, var(--void) 90%, transparent);
+}
+.lift-switch__knob {
+  position: absolute; top: 2px; left: 2px; width: 10px; height: 10px;
+  border-radius: 50%;
+  background-image: linear-gradient(180deg, var(--brass-mid), var(--gilt-deep));
+  transition: transform var(--t-med) var(--ease-open),
+              background-image var(--t-med) var(--ease-open);
+}
+.lift-switch[aria-pressed='true'] .lift-switch__knob {
+  transform: translateX(12px);
+  background-image: linear-gradient(180deg, var(--brass-hi), var(--brass));
+}
+.lift-switch__label {
+  font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
+  letter-spacing: var(--track-label); text-transform: uppercase;
+  color: var(--gilt-lo);
+}
+.lift-switch[aria-pressed='true'] .lift-switch__label { color: var(--gilt-hi); }
+
+/* ---------- 15. THE BOOKS, UNDER THE MODERN CHROME ----------
+   data-lift redirects the wine ramp to slate so the desk, case and head go
+   neutral. That override would otherwise strip the boards and spines too, and
+   a bookshelf of grey slabs is not the point. These rules repaint the book
+   objects from the leather tokens, which the redirect cannot reach — so the
+   frame is modern and the books on it are still bound in wine and gilt. */
+:root[data-lift='on'] .title-board {
+  background-image: var(--tex-cloth),
+    linear-gradient(90deg, var(--leather-edge) 0 3px, var(--leather-deep) 3px 8px, transparent 15px),
+    linear-gradient(161deg, var(--leather-hi), var(--leather-face) 46%, var(--leather-deep));
+}
+:root[data-lift='on'] .spread__page {
+  background-image: var(--tex-cloth),
+    linear-gradient(90deg, var(--leather-edge) 0 4px, var(--leather-deep) 4px 9px, var(--leather-lo) 16px),
+    linear-gradient(161deg, var(--leather-lo), var(--leather-deep));
+}
+:root[data-lift='on'] .board-cover {
+  background-color: var(--spine-tint, var(--leather-face));
+}
+/* The desk keeps one warm radial in the upper left: a neutral room still has
+   a lamp in it, and it is what stops the slate reading as cold. */
+:root[data-lift='on'] .desk {
+  background-image:
+    radial-gradient(880px 600px at 22% -8%,
+      color-mix(in oklab, var(--leather-hi) 26%, transparent) 0%, transparent 62%),
+    radial-gradient(760px 700px at 104% 108%,
+      color-mix(in oklab, var(--void) 70%, transparent) 0%, transparent 66%),
+    linear-gradient(158deg, var(--wine-800) 0%, var(--wine-900) 40%,
+      var(--wine-950) 76%, var(--void) 100%);
+}
+
+/* one result block per book found in a picked folder */
+.found { margin: var(--s-5) 0; padding: var(--s-4) var(--s-5);
+  border-radius: var(--radius-card);
+  background: color-mix(in oklab, var(--ivory-50) 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--gilt-blind) 30%, transparent); }
+.found__head { display: flex; align-items: baseline; gap: var(--s-4); }
+.found__head h3 { flex: 1; margin: 0; font-family: var(--serif);
+  font-size: var(--fs-lead); color: var(--gilt-hi); }
+.found__fields { display: grid; gap: 0.9rem; max-width: 28rem; margin: var(--s-4) 0; }
+.found__fields label { display: grid; gap: 0.3rem; }
+
+/* =============================================================================
+   16. DIRECTION B — PRODUCT SURFACE.  Append to src/styles/app.css.
+   Every rule is scoped to :root[data-lift='on']; "Deeper" is untouched.
+
+   The argument: colour was never going to do this on its own. What reads as
+   modern is the absence of drawn edges. So every bevel, rim, brass rail, gilt
+   rule, oak plank, photo corner, paper grain, letterpress shadow and hard
+   `0 1px 0` contact line is removed, and the work they were doing is given to
+   three things instead: a surface value step, a large radius, and a diffuse
+   shadow. What is left is a 4px grid, one accent that only means state, and
+   controls at two fixed heights.
+   ========================================================================== */
+
+/* ---------- B1. STRIP THE ROOM ------------------------------------------- */
+/* one line that makes every native control Chrome draws — the speed select,
+   the range track fallback, the caret, the default scrollbar — dark instead
+   of a light OS widget sitting on a near-black page */
+:root[data-lift='on'] { color-scheme: dark; }
+
+/* the fixed paper grain over the whole app */
+:root[data-lift='on'] body::after { display: none; }
+
+/* the reading lamp and its vignette: one soft wash, no falloff ring */
+:root[data-lift='on'] .shell {
+  background: var(--b-base);
+}
+:root[data-lift='on'] .shell::before {
+  background-image:
+    radial-gradient(1200px 720px at 10% -24%,
+      color-mix(in oklab, var(--b-tint) 4%, transparent) 0%, transparent 64%);
+}
+:root[data-lift='on'] .desk {
+  background-image: none;
+  background-color: var(--b-base);
+  box-shadow: none;
+}
+
+/* pure ornament, deleted outright.
+   NB: these are written out one per line rather than gathered into an :is()
+   list, because :is() is forgiving and silently DROPS any pseudo-element
+   passed to it — an :is(.quote::before, ...) rule parses and then does
+   nothing at all. */
+:root[data-lift='on'] :is(.rule-double, .fleuron, .footer__fleuron,
+                          .ribbon, .endpaper) { display: none; }
+:root[data-lift='on'] .head::after { display: none; }              /* brass rail   */
+:root[data-lift='on'] .transport::before { display: none; }        /* gilt hairline*/
+:root[data-lift='on'] .folio-view::after { display: none; }        /* dust motes   */
+:root[data-lift='on'] .modal::before { display: none; }            /* gilt headband*/
+:root[data-lift='on'] .plate::before { display: none; }
+:root[data-lift='on'] .sc--ruled::after { display: none; }         /* gilt rule    */
+:root[data-lift='on'] .plank::after { display: none; }             /* green felt   */
+:root[data-lift='on'] .colophon::before { display: none; }         /* fleuron      */
+:root[data-lift='on'] .board-cover::before { display: none; }      /* headband     */
+:root[data-lift='on'] .board-cover::after { display: none; }       /* photo corners*/
+:root[data-lift='on'] .quote::before { display: none; }            /* printer's "  */
+:root[data-lift='on'] .toc li[aria-current='true']::before { display: none; }
+:root[data-lift='on'] .leaf::after { content: none; }              /* gutter shade */
+:root[data-lift='on'] .toc li[data-played='true'] .toc__n::after { content: none; }
+
+/* leaders keep their spacing job and lose their dotted baseline */
+:root[data-lift='on'] .leader { border-bottom-color: transparent; margin: 0 0.5rem; }
+
+/* ---------- B2. TYPE ----------------------------------------------------- */
+:root[data-lift='on'] body {
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-text);
+  letter-spacing: -0.006em;
+  color: var(--b-ink);
+  -webkit-font-smoothing: antialiased;
+}
+:root[data-lift='on'] :is(h1, h2, h3, h4) {
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: var(--lh-tight);
+}
+/* serif survives exactly where the BOOK speaks, never where the app does */
+:root[data-lift='on'] :is(.title-board h2, .quote__text, .folio-view__chapter) {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+/* the label system: sentence case, near-zero tracking, ink not gold */
+:root[data-lift='on'] .sc {
+  font-family: var(--sans);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-transform: none;
+  color: var(--b-ink);
+}
+:root[data-lift='on'] .sc--wide {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .sc--cool { color: var(--b-ink-faint); }
+:root[data-lift='on'] h3.sc--ruled { margin: var(--s-6) 0 var(--s-3); font-size: var(--fs-lead); }
+:root[data-lift='on'] h3.sc--ruled:first-child { margin-top: 0; }
+:root[data-lift='on'] .folio {
+  font-family: var(--sans); font-size: var(--fs-micro);
+  letter-spacing: 0.05em; color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .fig { font-family: var(--sans); font-size: var(--fs-small); letter-spacing: 0; }
+:root[data-lift='on'] .muted { color: var(--b-ink-dim); }
+:root[data-lift='on'] .faint { color: var(--b-ink-faint); }
+:root[data-lift='on'] .italic-note { font-family: var(--sans); font-style: normal; color: var(--b-ink-faint); }
+:root[data-lift='on'] .dropcap::first-letter {
+  float: none; font-family: inherit; font-size: inherit;
+  line-height: inherit; padding: 0; color: inherit;
+}
+/* the shared "set on paper" rule: no letterpress bite on a dark surface */
+:root[data-lift='on'] :is(.leaf, .card, .plate, .slip, .borrower) {
+  font-family: var(--sans);
+  color: var(--b-ink);
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+}
+:root[data-lift='on'] .gilt-stamp { color: var(--b-ink); text-shadow: none; }
+
+/* ---------- B3. CONTROLS ------------------------------------------------- */
+/* a focus ring that is actually visible, on everything, at one offset */
+:root[data-lift='on'] :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--b-accent);
+  outline-offset: 2px;
+}
+:root[data-lift='on'] ::selection { background: color-mix(in oklab, var(--b-accent) 28%, transparent); }
+
+/* THE CONTROL RULE: a control's fill is always one rung ABOVE whatever
+   contains it. Header (sunken) -> control s1. Card (s1) -> field s2. A dark
+   well punched into a dark card is the 2009 move; a lighter fill is the
+   modern one, and it keeps every surface on the same temperature. */
+:root[data-lift='on'] :is(input, select, textarea) {
+  color: var(--b-ink);
+  background: var(--b-s2);
+  border: 1px solid var(--b-hair);
+  border-radius: var(--b-r2);
+  padding: 0.5rem 0.7rem;
+  box-shadow: none;
+  transition: border-color var(--t-fast) var(--ease-settle),
+              background-color var(--t-fast) var(--ease-settle);
+}
+/* a macOS <select> paints the native menulist and ignores an author
+   background entirely, so on a near-black page it stayed a light grey pill
+   even under color-scheme: dark. appearance:none plus a two-gradient chevron
+   is the only way to get a dark one without shipping an image. */
+:root[data-lift='on'] select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 1.6rem;
+  background-color: var(--b-s2);
+  background-image:
+    linear-gradient(45deg,  transparent 50%, var(--b-ink-faint) 50%),
+    linear-gradient(135deg, var(--b-ink-faint) 50%, transparent 50%);
+  background-position: right 0.85rem center, right 0.55rem center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+:root[data-lift='on'] :is(input, select, textarea):hover:not(:disabled) { border-color: var(--b-hair-hi); }
+:root[data-lift='on'] :is(input, select, textarea):focus-visible {
+  border-color: var(--b-accent);
+  outline-offset: 1px;
+}
+:root[data-lift='on'] input::placeholder { color: var(--b-ink-faint); }
+
+/* scrollbars: a thumb on a transparent track, not a brass rod in a groove */
+:root[data-lift='on'] ::-webkit-scrollbar { width: 10px; height: 10px; }
+:root[data-lift='on'] ::-webkit-scrollbar-track { background: transparent; }
+:root[data-lift='on'] ::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in oklab, var(--ivory-50) 14%, transparent);
+}
+:root[data-lift='on'] ::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--ivory-50) 26%, transparent);
+}
+
+/* ---------- B4. THE HEAD.  4.75rem -> 3.5rem, and nothing is metal. ------ */
+:root[data-lift='on'] .head {
+  gap: var(--s-4);
+  padding: 0 var(--s-4);
+  background-image: none;
+  background-color: var(--b-sunken);
+  border-bottom: 1px solid var(--b-hair-lo);
+  box-shadow: none;
+}
+:root[data-lift='on'] .head__mark { gap: 0.55rem; }
+/* the artwork is wine on transparent, so it keeps a plate — but the plate is
+   now a 28px app-icon chip rather than a 50px white card */
+:root[data-lift='on'] .head__logo {
+  width: 28px; height: 28px; padding: 3px;
+  background: var(--b-tint);
+  border-radius: 8px;
+  box-shadow: none;
+}
+:root[data-lift='on'] .head__mark b {
+  font-family: var(--sans); font-size: var(--fs-small); font-weight: 600;
+  font-variant-caps: normal; letter-spacing: -0.012em;
+  white-space: nowrap;
+  color: var(--b-ink); text-shadow: none;
+}
+:root[data-lift='on'] .head__run {
+  justify-content: flex-start;
+  gap: 0.5rem; padding-left: var(--s-2);
+  font-family: var(--sans); font-size: var(--fs-small);
+  letter-spacing: -0.004em; text-transform: none;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .head__run b {
+  font-family: var(--sans); font-weight: 600; font-size: var(--fs-small);
+  letter-spacing: -0.01em; color: var(--b-ink);
+}
+:root[data-lift='on'] .head__run i { font-style: normal; color: var(--b-ink-faint); }
+:root[data-lift='on'] .head__crumb { color: var(--b-ink-faint); }
+:root[data-lift='on'] .head__crumb:hover { color: var(--b-accent-text); text-decoration: none; }
+:root[data-lift='on'] .head__right { gap: var(--s-2); }
+
+/* the search field is a field: 34px, 10px radius, filled, focus ring */
+:root[data-lift='on'] .head__find {
+  height: var(--b-ctl-h);
+  padding: 0 0.7rem; gap: 0.5rem;
+  border-radius: var(--b-r2);
+  border: 1px solid var(--b-hair);
+  background: var(--b-s1);
+}
+:root[data-lift='on'] .head__find:hover { background: var(--b-s2); }
+:root[data-lift='on'] .head__find:focus-within {
+  border-color: var(--b-accent);
+  background: var(--b-s1);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--b-accent) 22%, transparent);
+}
+:root[data-lift='on'] .head__find svg { width: 14px; height: 14px; fill: var(--b-ink-faint); }
+:root[data-lift='on'] .head__find input {
+  width: 12.5rem; padding: 0; border: 0; box-shadow: none;
+  background: none; font-size: var(--fs-small); color: var(--b-ink);
+}
+
+/* the mini transport in the head: a pill with an accent play stud */
+:root[data-lift='on'] .head__pill {
+  height: var(--b-ctl-h);
+  padding: 0 0.7rem 0 0.25rem; gap: 0.5rem;
+  border-radius: var(--radius-pill);
+  background-image: none;
+  background-color: var(--b-s1);
+  box-shadow: inset 0 0 0 1px var(--b-hair);
+}
+:root[data-lift='on'] .head__pill span { font-size: var(--fs-small); color: var(--b-ink-dim); }
+:root[data-lift='on'] .head__pill .fig { color: var(--b-ink-faint); font-size: var(--fs-micro); }
+:root[data-lift='on'] .head__knob {
+  width: 1.75rem; height: 1.75rem;
+  background-image: none;
+  background-color: var(--b-accent);
+  box-shadow: none;
+  transition: background-color var(--t-fast) var(--ease-settle);
+}
+:root[data-lift='on'] .head__knob:hover { background-color: var(--b-accent-hi); }
+:root[data-lift='on'] .head__knob svg { width: 0.8rem; height: 0.8rem; fill: var(--b-on-accent); }
+:root[data-lift='on'] .head__acct > span {
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: var(--b-ink-faint); max-width: 9rem;
+}
+
+/* the variant switch becomes an actual switch */
+:root[data-lift='on'] .lift-switch {
+  height: var(--b-ctl-h);
+  padding: 0 0.7rem 0 0.35rem; gap: 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--b-s1);
+  box-shadow: inset 0 0 0 1px var(--b-hair);
+}
+:root[data-lift='on'] .lift-switch:hover {
+  background: var(--b-s2);
+  box-shadow: inset 0 0 0 1px var(--b-hair-hi);
+}
+:root[data-lift='on'] .lift-switch__track {
+  width: 30px; height: 18px;
+  background: var(--b-accent);
+  box-shadow: none;
+}
+:root[data-lift='on'] .lift-switch__knob {
+  top: 3px; left: 3px; width: 12px; height: 12px;
+  background-image: none;
+  background-color: var(--b-tint);
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--b-shadow) 55%, transparent);
+}
+:root[data-lift='on'] .lift-switch[aria-pressed='true'] .lift-switch__knob {
+  transform: translateX(12px);
+  background-image: none;
+  background-color: var(--b-tint);
+}
+:root[data-lift='on'] .lift-switch__label {
+  font-size: var(--fs-small); font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  color: var(--b-ink-dim);
+}
+:root[data-lift='on'] .lift-switch[aria-pressed='true'] .lift-switch__label { color: var(--b-ink); }
+
+/* ---------- B5. THE SIDEBAR.  21rem of tipping books -> 17.5rem of list. -- */
+:root[data-lift='on'] .case {
+  background-image: none;
+  background-color: var(--b-sunken);
+  border-right: 1px solid var(--b-hair-lo);
+  box-shadow: none;
+}
+:root[data-lift='on'] .case__drawer {
+  padding: var(--s-3) var(--s-3) var(--s-4);
+  background-image: none;
+  box-shadow: none;
+}
+:root[data-lift='on'] .run { margin-bottom: 0; }
+:root[data-lift='on'] .run__books {
+  padding: 0; gap: 2px;
+  background: none;
+  perspective: none;
+}
+/* the oak board between runs becomes a hairline divider */
+:root[data-lift='on'] .plank {
+  height: 1px;
+  margin: var(--s-3) var(--s-2) var(--s-3);
+  background-image: none;
+  background-color: var(--b-hair-lo);
+  border-radius: 0;
+  box-shadow: none;
+}
+/* a spine was a 38px cloth slab with a joint rule painted across it and a
+   rotateX tip on hover. It is a row now: 3px binding rail, two lines of
+   text, a 2px progress bar, and a surface step for hover and current. */
+:root[data-lift='on'] .volume {
+  min-height: 0;
+  padding: 0.5rem 0.6rem 0.55rem 0.9rem;
+  border-radius: var(--b-r2);
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  transform: none;
+  overflow: visible;
+  transition: background-color var(--t-fast) var(--ease-settle),
+              box-shadow var(--t-fast) var(--ease-settle);
+}
+:root[data-lift='on'] .volume::before {
+  left: 0.3rem; top: 0.55rem; bottom: 0.55rem;
+  width: 3px; border-radius: var(--radius-pill);
+  background-image: none;
+  background-color: color-mix(in oklab, var(--spine-tint, var(--wine-chosen)) 60%, var(--ivory-200));
+  box-shadow: none;
+  opacity: 0.75;
+  transition: opacity var(--t-fast) var(--ease-settle);
+}
+:root[data-lift='on'] .volume:hover {
+  transform: none;
+  background-color: var(--b-s1);
+  box-shadow: none;
+}
+:root[data-lift='on'] .volume:hover::before { opacity: 1; }
+:root[data-lift='on'] .volume[aria-current='true'] {
+  transform: none;
+  background-color: var(--b-s2);
+  box-shadow: inset 0 0 0 1px var(--b-hair);
+}
+:root[data-lift='on'] .volume[aria-current='true']::before { opacity: 1; }
+:root[data-lift='on'] .volume__title {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-family: var(--sans); font-size: var(--fs-small); font-weight: 600;
+  line-height: 1.32; letter-spacing: -0.008em;
+  color: var(--b-ink-dim);
+  text-shadow: none;
+}
+:root[data-lift='on'] .volume[aria-current='true'] .volume__title { color: var(--b-ink); }
+:root[data-lift='on'] .volume__author {
+  margin-top: 0.1rem;
+  font-size: var(--fs-micro); font-weight: 400;
+  color: var(--b-ink-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* the track is barely there on purpose: at 9% ivory it ran the full width of
+   every started row and read as a divider between books */
+:root[data-lift='on'] .volume__edge {
+  left: 0.9rem; right: 0.6rem; bottom: 0.25rem; height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--b-hair-lo);
+}
+:root[data-lift='on'] .volume__edge i {
+  background: var(--b-accent);
+  border-radius: var(--radius-pill);
+}
+:root[data-lift='on'] .case__empty {
+  margin: var(--s-4) var(--s-2);
+  padding: var(--s-4);
+  border-radius: var(--b-r2);
+  background: var(--b-s1);
+  box-shadow: none;
+  font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .case__foot {
+  padding: var(--s-3);
+  border-top: 1px solid var(--b-hair-lo);
+}
+
+/* ---------- B6. THE PAGE ------------------------------------------------- */
+:root[data-lift='on'] .page { padding: var(--s-6) 0 var(--s-8); }
+:root[data-lift='on'] .page__inner { max-width: 64rem; padding: 0 var(--b-gut); }
+
+/* the title board: a leather panel with a gilt double-rule inset frame and a
+   pasted card on it becomes one card with real padding */
+:root[data-lift='on'] .title-board {
+  gap: var(--s-6);
+  padding: var(--s-6);
+  border-radius: var(--b-r4);
+  background-color: var(--b-s1);
+  background-image: none;
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo), var(--b-sh2);
+}
+:root[data-lift='on'] .title-board__body { padding: 0; }
+:root[data-lift='on'] .title-board h2 {
+  font-size: var(--fs-title); line-height: 1.08;
+  color: var(--b-ink); text-shadow: none;
+}
+:root[data-lift='on'] .title-board__by {
+  margin: 0.45rem 0 var(--s-5);
+  font-family: var(--sans); font-size: var(--fs-lead); font-weight: 400;
+  letter-spacing: -0.006em;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .title-board .btn { margin-top: var(--s-5); }
+:root[data-lift='on'] .title-board .notice { margin: var(--s-4) 0; }
+
+/* the bookplate: no rotation, no double outline, no paper — a metadata row */
+:root[data-lift='on'] .plate {
+  max-width: none;
+  margin-top: var(--s-4);
+  padding: 0;
+  transform: none;
+  background: none; background-image: none;
+  border: 0; outline: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+:root[data-lift='on'] .plate__accession {
+  margin: 0; padding: 0; border: 0;
+  gap: 0.3rem 1.1rem;
+  font-family: var(--sans); font-size: var(--fs-small);
+  letter-spacing: 0;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .plate__accession b { font-weight: 500; color: var(--b-ink-dim); }
+
+/* the cover mount keeps its spine edge and loses the gilt frame, the
+   headband and the four photo corners */
+:root[data-lift='on'] .board-cover {
+  width: 172px;
+  padding: 0 0 0 6px;
+  border-radius: var(--b-r3);
+  overflow: hidden;
+  background-image: none;
+  background-color: color-mix(in oklab, var(--spine-tint, var(--wine-chosen)) 80%, var(--b-sunken));
+  box-shadow: var(--b-sh3);
+}
+:root[data-lift='on'] .board-cover img,
+:root[data-lift='on'] .board-cover .cover--empty {
+  border-radius: 0;
+  background: var(--b-s2);
+  box-shadow: none;
+}
+:root[data-lift='on'] .cover--empty {
+  color: var(--b-ink-faint);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.04em;
+}
+
+/* progress: a 6px pill in the accent, not a gilded fore-edge */
+:root[data-lift='on'] .gauge {
+  height: 6px;
+  margin: var(--s-5) 0 var(--s-3);
+  border-radius: var(--radius-pill);
+  background-image: none;
+  background-color: var(--b-hair);
+  box-shadow: none;
+}
+:root[data-lift='on'] .gauge__gilt {
+  border-radius: var(--radius-pill);
+  background-image: none;
+  background-color: var(--b-accent);
+}
+:root[data-lift='on'] .gauge__tick { background: color-mix(in oklab, var(--b-sunken) 60%, transparent); }
+:root[data-lift='on'] .gauge__tick--now { width: 2px; background: var(--b-ink); box-shadow: none; }
+:root[data-lift='on'] .gauge__legend {
+  gap: 0.6rem;
+  font-family: var(--sans); font-size: var(--fs-small);
+  letter-spacing: 0; text-transform: none;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .gauge__legend .num { color: var(--b-ink-dim); letter-spacing: 0; }
+
+/* ---------- B7. THE CHAPTER LIST.  A printed page -> a list. ------------- */
+:root[data-lift='on'] .spread { gap: var(--s-5); margin-top: var(--s-5); }
+/* the wine board the leaf was bound into is removed entirely, so the list
+   itself is the card rather than a page inside a cover */
+:root[data-lift='on'] .spread__page {
+  padding: 0;
+  border-radius: 0;
+  background-image: none;
+  background-color: transparent;
+  box-shadow: none;
+}
+:root[data-lift='on'] .leaf {
+  max-width: none;
+  margin: 0;
+  padding: var(--s-4) var(--s-3);
+  border-radius: var(--b-r3);
+  background-color: var(--b-s1);
+  background-image: none;
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo);
+  font-family: var(--sans);
+  color: var(--b-ink);
+  text-shadow: none;
+}
+:root[data-lift='on'] .leaf__runhead {
+  padding: 0 0.5rem 0.7rem;
+  margin-bottom: var(--s-2);
+  border-bottom: 1px solid var(--b-hair-lo);
+  box-shadow: none;
+  font-family: var(--sans); font-size: var(--fs-small); font-weight: 600;
+  letter-spacing: -0.004em; text-transform: none;
+  color: var(--b-ink);
+}
+:root[data-lift='on'] .leaf__count {
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .leaf__caret { border-top-color: var(--b-ink-faint); }
+:root[data-lift='on'] .leaf__runhead:hover .leaf__caret { border-top-color: var(--b-ink); }
+:root[data-lift='on'] .leaf__folio { font-family: var(--sans); color: var(--b-ink-faint); letter-spacing: 0; }
+
+:root[data-lift='on'] .toc__row {
+  padding: 0.45rem 2.4rem 0.45rem 0.5rem;
+  border-radius: var(--b-r1);
+  transition: background-color var(--t-fast) var(--ease-settle);
+}
+:root[data-lift='on'] .toc__row:hover:not(:disabled) { background: var(--b-s2); }
+:root[data-lift='on'] .toc__n {
+  width: 1.6rem; margin-right: 0.6rem;
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .toc__t {
+  font-family: var(--sans); font-size: var(--fs-body); font-weight: 450;
+  letter-spacing: -0.006em; max-width: 58%;
+  color: var(--b-ink-dim);
+}
+:root[data-lift='on'] .toc__d {
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .toc__cum {
+  width: 4.2rem;
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: color-mix(in oklab, var(--ivory-100) 38%, transparent);
+}
+:root[data-lift='on'] .toc li[data-played='true'] :is(.toc__t, .toc__d) {
+  color: color-mix(in oklab, var(--ivory-100) 42%, transparent);
+}
+:root[data-lift='on'] .toc li[aria-current='true'] .toc__row {
+  background: color-mix(in oklab, var(--b-accent) 14%, var(--b-s1));
+  box-shadow: inset 2px 0 0 var(--b-accent);
+}
+:root[data-lift='on'] .toc li[aria-current='true'] .toc__t {
+  font-style: normal; font-weight: 600; color: var(--b-ink);
+}
+:root[data-lift='on'] .toc li[aria-current='true'] .toc__n { color: var(--b-accent-text); font-weight: 600; }
+:root[data-lift='on'] .toc__mark {
+  right: 0.45rem; top: 0.45rem; width: 10px; height: 16px;
+  background: color-mix(in oklab, var(--ivory-50) 14%, transparent);
+}
+:root[data-lift='on'] .toc__mark:hover { background: color-mix(in oklab, var(--b-accent) 60%, transparent); }
+:root[data-lift='on'] .toc__mark[aria-pressed='true'] { background: var(--b-accent); }
+:root[data-lift='on'] .toc--long { max-height: min(56vh, 30rem); padding-right: 0.25rem; }
+:root[data-lift='on'] .toc--long::-webkit-scrollbar-track { background: transparent; }
+:root[data-lift='on'] .toc--long::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--ivory-50) 14%, transparent);
+}
+:root[data-lift='on'] .toc--long::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--ivory-50) 26%, transparent);
+}
+
+/* ---------- B8. THE APPARATUS.  Felt sheets -> cards; a dl -> a table. --- */
+:root[data-lift='on'] .apparatus { gap: var(--s-3); top: var(--s-5); }
+:root[data-lift='on'] :is(.sheet, .keys) {
+  padding: var(--s-4);
+  border-radius: var(--b-r3);
+  background-image: none;
+  background-color: var(--b-s1);
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo);
+  color: var(--b-ink-dim);
+}
+:root[data-lift='on'] .sheet > .sc { margin-bottom: var(--s-2); }
+:root[data-lift='on'] .apparatus dl { gap: 0; }
+:root[data-lift='on'] .apparatus dl > div {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--s-4);
+  padding: 0.42rem 0;
+  border-top: 1px solid var(--b-hair-lo);
+}
+:root[data-lift='on'] .apparatus dl > div:first-child { border-top: 0; padding-top: 0; }
+:root[data-lift='on'] .apparatus dt {
+  font-size: var(--fs-small); font-weight: 400;
+  letter-spacing: 0; text-transform: none;
+  color: var(--b-ink-faint);
+  white-space: nowrap;
+}
+:root[data-lift='on'] .apparatus dd {
+  margin: 0; max-width: 60%; text-align: right;
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: var(--b-ink-dim);
+}
+:root[data-lift='on'] .keys ul { gap: 0.4rem; margin-top: var(--s-3); }
+:root[data-lift='on'] .keys li { font-size: var(--fs-small); color: var(--b-ink-faint); }
+:root[data-lift='on'] .keys kbd {
+  min-width: 1.9rem; padding: 0.12rem 0.4rem;
+  border-radius: var(--b-r1);
+  background-image: none;
+  background-color: var(--b-s3);
+  box-shadow: inset 0 0 0 1px var(--b-hair);
+  font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
+  color: var(--b-ink-dim);
+}
+:root[data-lift='on'] .colophon {
+  margin-top: var(--s-7);
+  font-family: var(--sans); font-style: normal; font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .footer { padding: var(--s-6) var(--b-gut) var(--s-7); }
+:root[data-lift='on'] .footer__rule { height: 1px; background: var(--b-hair-lo); }
+
+/* ---------- B9. THE DAY BOOK.  A printed head -> a page header. ---------- */
+:root[data-lift='on'] .daybook {
+  padding: var(--s-6) var(--b-gut) var(--s-8);
+  max-width: 64rem;
+}
+:root[data-lift='on'] .daybook__head {
+  margin-bottom: var(--s-6);
+  padding: 0;
+  background: none; background-image: none;
+  box-shadow: none;
+  font-family: var(--sans);
+  color: var(--b-ink);
+  text-shadow: none;
+}
+:root[data-lift='on'] .daybook__head h2 {
+  font-size: var(--fs-head);
+  text-align: left;
+  font-variant-caps: normal;
+  letter-spacing: -0.022em;
+  color: var(--b-ink);
+}
+:root[data-lift='on'] .daybook__head p {
+  max-width: 42rem;
+  margin: var(--s-2) 0 0;
+  font-size: var(--fs-lead);
+  font-variant-numeric: normal;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .daybook__head .folio {
+  position: static;
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .daybook h3.sc { margin-top: var(--s-6); }
+
+/* "continue" rows: three saturated slabs with fore-edges -> three list rows */
+:root[data-lift='on'] .continue { gap: var(--s-2); }
+:root[data-lift='on'] .pulled {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-4) var(--s-3) calc(var(--s-4) + 4px);
+  border-radius: var(--b-r3);
+  background-color: var(--b-s1);
+  background-image: none;
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo);
+  transition: background-color var(--t-fast) var(--ease-settle),
+              box-shadow var(--t-fast) var(--ease-settle);
+}
+/* the fore-edge is re-cut as the binding rail, so the row still says which
+   book it is without painting the whole row in the binding colour */
+:root[data-lift='on'] .pulled::after {
+  content: '';
+  left: 0.6rem; right: auto; top: 0.8rem; bottom: 0.8rem;
+  width: 3px;
+  border-radius: var(--radius-pill);
+  background-image: none;
+  background-color: color-mix(in oklab, var(--spine-tint, var(--wine-chosen)) 60%, var(--ivory-200));
+}
+:root[data-lift='on'] .pulled:hover {
+  transform: none;
+  background-color: var(--b-s2);
+  box-shadow: inset 0 0 0 1px var(--b-hair), var(--b-sh1);
+}
+:root[data-lift='on'] .pulled img {
+  width: 44px; height: 44px;
+  border-radius: var(--b-r1);
+  box-shadow: none;
+}
+:root[data-lift='on'] .pulled__title {
+  font-family: var(--sans); font-size: var(--fs-body); font-weight: 600;
+  letter-spacing: -0.008em;
+  color: var(--b-ink);
+}
+:root[data-lift='on'] .pulled__where {
+  margin-top: 0.12rem;
+  font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .pulled__when {
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+/* Chrome centres a <button>'s content in its box, so in a stretch-aligned
+   flex row a one-line caption pushed its cover down while a two-line one did
+   not. Top-align the row and stop the items flexing. */
+:root[data-lift='on'] .accessions { gap: var(--s-4); align-items: flex-start; }
+:root[data-lift='on'] .accession { width: 104px; flex: none; }
+:root[data-lift='on'] .accession .board-cover {
+  width: 104px; padding-left: 4px;
+  border-radius: var(--b-r2);
+  box-shadow: var(--b-sh2);
+}
+:root[data-lift='on'] .accession .board-cover img,
+:root[data-lift='on'] .accession .board-cover .cover--empty {
+  box-shadow: none; border-radius: 0;
+}
+:root[data-lift='on'] .accession b {
+  margin-top: 0.5rem;
+  font-family: var(--sans); font-weight: 500; font-size: var(--fs-small);
+  letter-spacing: -0.005em;
+  color: var(--b-ink-dim);
+}
+
+/* ---------- B10. THE LISTENING VIEW -------------------------------------- */
+:root[data-lift='on'] .folio-view {
+  border-left: 1px solid var(--b-hair-lo);
+  background-image:
+    radial-gradient(1000px 680px at 50% -12%, var(--b-s1) 0%, var(--b-base) 66%);
+}
+:root[data-lift='on'] .folio-view__top { padding: var(--s-4) var(--s-5); }
+:root[data-lift='on'] .folio-view__stage { gap: var(--s-6); }
+/* the painted ground-shadow ellipse: it is pinned at 40vh, so it lands on the
+   titles rather than under the cover, and the cover has a real shadow now */
+:root[data-lift='on'] .folio-view__stage::after { display: none; }
+:root[data-lift='on'] .folio-view .board-cover {
+  width: min(38vh, 320px);
+  padding-left: 8px;
+  border-radius: var(--b-r4);
+  box-shadow: var(--b-sh4);
+}
+:root[data-lift='on'] .folio-view__chapter { font-size: var(--fs-sub); color: var(--b-ink); }
+:root[data-lift='on'] .folio-view__book {
+  margin-top: 0.35rem;
+  font-family: var(--sans); font-style: normal; font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+
+/* ---------- B11. THE TRANSPORT.  A brass console -> a control bar. ------- */
+:root[data-lift='on'] .transport {
+  gap: var(--s-3);
+  margin: 0 auto var(--s-6);
+  padding: var(--s-4) var(--s-5);
+  width: min(46rem, calc(100% - 3rem));
+  border-radius: var(--b-r4);
+  background-image: none;
+  background-color: var(--b-s1);
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo), var(--b-sh3);
+}
+:root[data-lift='on'] .transport__time {
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .transport__row { gap: 0.35rem; }
+:root[data-lift='on'] .tbtn {
+  width: var(--b-ctl-h-lg); height: var(--b-ctl-h-lg);
+  color: var(--b-ink-dim);
+  background-image: none;
+  background-color: transparent;
+  box-shadow: none;
+  transition: color var(--t-fast) var(--ease-settle),
+              background-color var(--t-fast) var(--ease-settle);
+}
+:root[data-lift='on'] .tbtn:hover:not(:disabled) {
+  color: var(--b-ink);
+  background-color: var(--b-s3);
+  box-shadow: none;
+}
+:root[data-lift='on'] .tbtn svg { width: 1.3rem; height: 1.3rem; }
+:root[data-lift='on'] .tbtn--play {
+  width: 3.25rem; height: 3.25rem; margin: 0 0.5rem;
+  color: var(--b-on-accent);
+  background-image: none;
+  background-color: var(--b-accent);
+  box-shadow: 0 8px 22px -8px color-mix(in oklab, var(--b-accent) 70%, transparent);
+}
+:root[data-lift='on'] .tbtn--play:hover:not(:disabled) {
+  color: var(--b-on-accent);
+  background-image: none;
+  background-color: var(--b-accent-hi);
+}
+:root[data-lift='on'] .tbtn--play svg { width: 1.45rem; height: 1.45rem; }
+:root[data-lift='on'] .tbtn--ribbon { width: var(--b-ctl-h-lg); border-radius: 50%; }
+:root[data-lift='on'] .tbtn--ribbon svg { width: 0.85rem; height: 1.15rem; stroke: currentColor; }
+:root[data-lift='on'] .tbtn--ribbon[aria-pressed='true'] {
+  color: var(--b-accent-text);
+  background-color: color-mix(in oklab, var(--b-accent) 18%, transparent);
+  box-shadow: none;
+}
+:root[data-lift='on'] .tbtn--ribbon[aria-pressed='true'] svg { fill: currentColor; stroke: currentColor; }
+:root[data-lift='on'] .tbtn--quote svg { width: 1.2rem; height: 1.2rem; }
+:root[data-lift='on'] .scrub {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background-image: none;
+  background-color: var(--b-hair);
+  box-shadow: none;
+}
+:root[data-lift='on'] .scrub::-webkit-slider-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background-image: none;
+  background-color: var(--b-ink);
+  box-shadow: 0 1px 3px color-mix(in oklab, var(--b-shadow) 60%, transparent);
+}
+:root[data-lift='on'] .rate {
+  gap: 0.6rem;
+  font-size: var(--fs-small);
+  letter-spacing: 0; text-transform: none;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .rate select {
+  padding: 0.25rem 1.5rem 0.25rem 0.55rem;
+  font-size: var(--fs-small);
+  border-radius: var(--b-r1);
+  background-color: var(--b-s2);
+  border: 1px solid var(--b-hair);
+  color: var(--b-ink-dim);
+}
+:root[data-lift='on'] .rate .num { color: var(--b-ink-dim); }
+
+/* ---------- B12. NOTICES, DIALOGS, EMPTY STATES -------------------------- */
+:root[data-lift='on'] :is(.notice, .alert) {
+  padding: var(--s-3) var(--s-4);
+  margin-bottom: var(--s-4);
+  border-radius: var(--b-r2);
+  background-image: none;
+  background-color: var(--b-s2);
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo);
+  font-size: var(--fs-small);
+}
+:root[data-lift='on'] .alert {
+  box-shadow: inset 3px 0 0 var(--wine-500), inset 0 0 0 1px var(--b-hair-lo);
+}
+:root[data-lift='on'] .alert strong { color: var(--b-ink); }
+:root[data-lift='on'] :is(.alert p, .notice p) { color: var(--b-ink-faint); }
+:root[data-lift='on'] .empty p { color: var(--b-ink-faint); }
+
+:root[data-lift='on'] .scrim {
+  background-image: none;
+  background-color: color-mix(in oklab, var(--b-sunken) 78%, transparent);
+  backdrop-filter: blur(18px);
+}
+:root[data-lift='on'] .borrower {
+  width: min(24rem, 100%);
+  padding: var(--s-6);
+  background: var(--b-s1);
+  border: 1px solid var(--b-hair-lo);
+  border-top: 1px solid var(--b-hair-lo);
+  border-radius: var(--b-r4);
+  box-shadow: var(--b-sh4);
+  text-shadow: none;
+}
+:root[data-lift='on'] .borrower__logo {
+  width: 64px; height: 64px; padding: 8px;
+  margin: 0 auto var(--s-4);
+  background: var(--b-tint);
+  border-radius: var(--b-r3);
+  box-shadow: none;
+}
+:root[data-lift='on'] .borrower h1 { font-size: var(--fs-sub); color: var(--b-ink); }
+:root[data-lift='on'] .borrower p { color: var(--b-ink-faint); font-size: var(--fs-small); }
+
+/* ---------- B13. STATISTICS ---------------------------------------------- */
+:root[data-lift='on'] .stats-screen {
+  background: var(--b-base);
+}
+:root[data-lift='on'] .stats-screen__bar {
+  padding: 0 var(--s-4);
+  border-bottom: 1px solid var(--b-hair-lo);
+  background: var(--b-sunken);
+}
+:root[data-lift='on'] .stats-screen__mark img {
+  width: 28px; height: 28px; padding: 3px;
+  background: var(--b-tint);
+  border-radius: 8px;
+}
+:root[data-lift='on'] .stats-screen__mark b {
+  font-family: var(--sans); font-size: var(--fs-body); font-weight: 600;
+  letter-spacing: -0.014em; color: var(--b-ink);
+}
+:root[data-lift='on'] .stats-screen__body { padding: var(--s-6) var(--b-gut) var(--s-8); }
+/* the tabs become a segmented control on a track */
+:root[data-lift='on'] .tabs {
+  gap: 2px; padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--b-s1);
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo);
+}
+:root[data-lift='on'] .tabs__tab {
+  padding: 0.3rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-small); font-weight: 500;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .tabs__tab:hover { color: var(--b-ink); background: var(--b-s2); }
+:root[data-lift='on'] .tabs__tab[aria-selected='true'] {
+  color: var(--b-ink);
+  background: var(--b-s3);
+  box-shadow: var(--b-sh1);
+  font-weight: 600;
+}
+:root[data-lift='on'] .tiles {
+  gap: var(--s-3);
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+}
+:root[data-lift='on'] .tile {
+  padding: var(--s-4);
+  border-radius: var(--b-r3);
+  background-image: none;
+  background-color: var(--b-s1);
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo);
+}
+:root[data-lift='on'] .tile__k {
+  margin-bottom: 0.5rem;
+  font-size: var(--fs-small);
+  letter-spacing: 0; text-transform: none;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .tile__v {
+  font-family: var(--sans); font-size: 2rem; font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--b-ink);
+}
+:root[data-lift='on'] .tile__v em {
+  font-size: 0.9rem; font-weight: 500;
+  margin-left: 4px;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .tile__sub { font-size: var(--fs-small); color: var(--b-ink-faint); }
+:root[data-lift='on'] .meters__track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--b-hair);
+}
+:root[data-lift='on'] .meters__track i {
+  background: var(--b-accent);
+  border-radius: var(--radius-pill);
+}
+:root[data-lift='on'] .meters__val { color: var(--b-ink-dim); }
+:root[data-lift='on'] .meters__left { color: var(--b-ink-faint); }
+:root[data-lift='on'] .daychart { gap: 3px; border-bottom: 1px solid var(--b-hair-lo); }
+:root[data-lift='on'] .daychart__col i {
+  border-radius: 4px 4px 2px 2px;
+  background: color-mix(in oklab, var(--b-accent) 50%, transparent);
+}
+:root[data-lift='on'] .daychart__col:hover i,
+:root[data-lift='on'] .daychart__col i[data-peak] { background: var(--b-accent); }
+:root[data-lift='on'] .daychart__axis { color: var(--b-ink-faint); }
+:root[data-lift='on'] .daychart__peak { color: var(--b-accent-text); }
+:root[data-lift='on'] .facts li {
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--b-hair-lo);
+}
+:root[data-lift='on'] .facts span { color: var(--b-ink-faint); }
+:root[data-lift='on'] .facts b { color: var(--b-ink); font-weight: 600; }
+:root[data-lift='on'] .devices .tag {
+  padding: 0.08rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--b-accent);
+  color: var(--b-on-accent);
+  font-size: var(--fs-micro); font-weight: 600;
+  letter-spacing: 0; text-transform: none;
+}
+:root[data-lift='on'] .setting input { accent-color: var(--b-accent); }
+:root[data-lift='on'] .setting span { font-size: var(--fs-small); color: var(--b-ink-dim); }
+
+/* ---------- B14. QUOTES AND THE COMPOSER --------------------------------- */
+:root[data-lift='on'] .quote {
+  padding: var(--s-5);
+  border-radius: var(--b-r3);
+  background-color: var(--b-s1);
+  background-image: none;
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo);
+  color: var(--b-ink);
+  text-shadow: none;
+}
+:root[data-lift='on'] .quote__text {
+  font-size: var(--fs-lead); line-height: 1.55;
+  color: var(--b-ink);
+}
+:root[data-lift='on'] .quote__by cite {
+  font-family: var(--sans); font-size: var(--fs-small); font-weight: 600;
+  color: var(--b-ink-dim);
+}
+:root[data-lift='on'] .quote__by cite::before { color: var(--b-ink-faint); }
+:root[data-lift='on'] .quote__via { font-style: normal; color: var(--b-ink-faint); }
+:root[data-lift='on'] .quote__note {
+  border-left: 2px solid var(--b-accent);
+  font-style: normal;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .quote__foot {
+  border-top: 1px solid var(--b-hair-lo);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .quote__src { color: var(--b-ink-dim); }
+:root[data-lift='on'] .quote__at { font-family: var(--sans); }
+:root[data-lift='on'] .quote__tag {
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--b-r1);
+  background: var(--b-s3);
+  font-family: var(--sans); font-size: var(--fs-micro);
+  letter-spacing: 0;
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] .quotes__book { color: var(--b-ink); }
+:root[data-lift='on'] .quotes__book:hover { color: var(--b-accent-text); text-decoration: none; }
+:root[data-lift='on'] .quotes__count { font-family: var(--sans); color: var(--b-ink-faint); }
+:root[data-lift='on'] .quotes__empty { color: var(--b-ink-faint); }
+:root[data-lift='on'] .quotes__group .sc--ruled i { font-family: var(--sans); color: var(--b-ink-faint); }
+:root[data-lift='on'] .quotes__find { min-width: 20rem; }
+
+:root[data-lift='on'] .composer {
+  padding: var(--s-5);
+  border-radius: var(--b-r4);
+  background-color: var(--b-s1);
+  background-image: none;
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo), var(--b-sh4);
+  font-family: var(--sans);
+  color: var(--b-ink);
+  text-shadow: none;
+}
+:root[data-lift='on'] .composer--inline {
+  box-shadow: inset 0 0 0 1px var(--b-hair-lo);
+}
+:root[data-lift='on'] .composer__title {
+  font-family: var(--sans); font-size: var(--fs-sub);
+  letter-spacing: -0.018em; color: var(--b-ink);
+}
+:root[data-lift='on'] .composer__where {
+  font-family: var(--sans); font-size: var(--fs-small);
+  color: var(--b-ink-faint);
+}
+:root[data-lift='on'] :is(.composer__field > .sc, .composer__clip > .sc) {
+  color: var(--b-ink-faint); font-weight: 500;
+}
+:root[data-lift='on'] :is(.composer__field textarea,
+                          .composer__field input,
+                          .composer__range input) {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--b-hair);
+  border-radius: var(--b-r2);
+  background-color: var(--b-s2);
+  box-shadow: none;
+  font-family: var(--sans); font-size: var(--fs-body);
+  color: var(--b-ink);
+}
+:root[data-lift='on'] :is(.composer__field textarea,
+                          .composer__field input)::placeholder {
+  color: var(--b-ink-faint); font-style: normal;
+}
+:root[data-lift='on'] :is(.composer__field textarea:focus,
+                          .composer__field input:focus,
+                          .composer__range input:focus) {
+  outline: 2px solid var(--b-accent);
+  outline-offset: 1px;
+  border-color: var(--b-accent);
+  background-color: var(--b-s2);
+}
+:root[data-lift='on'] .composer__clip {
+  border-radius: var(--b-r2);
+  background: var(--b-sunken);
+  box-shadow: none;
+}
+:root[data-lift='on'] :is(.composer__hint, .composer__busy,
+                          .composer__len, .composer__range span,
+                          .composer__check) {
+  color: var(--b-ink-faint);
+}
+
+/* ---------- B15. THE BOOK BUTTON ----------------------------------------
+   It stays a book: same spine, same hinge, same riffle. What changes is
+   proportion (44 -> 40px, spine 8 -> 7px), the corner radius of the boards
+   and the shadow under the cover. The one repair is colour: --book-leather-*
+   pointed at --wine-800 and --wine-950, both of which the ramp redirect
+   turned into chrome, so in the previous variant the primary action was a
+   grey slab with gold foil on it. The theme block above restates them from
+   steps the redirect cannot reach. ---------------------------------------- */
+:root[data-lift='on'] .btn__cover {
+  border-radius: 0 var(--b-r1) var(--b-r1) 0;
+  box-shadow: 2px 3px 10px -2px color-mix(in oklab, var(--b-shadow) 50%, transparent);
+}
+:root[data-lift='on'] .btn:not([data-phase]):not(:disabled):hover .btn__cover {
+  box-shadow: -5px 4px 14px -3px color-mix(in oklab, var(--b-shadow) 52%, transparent);
+}
+:root[data-lift='on'] .btn__spine {
+  border-radius: var(--b-r1) 0 0 var(--b-r1);
+  box-shadow: inset -1px 0 2px color-mix(in oklab, var(--b-shadow) 62%, transparent);
+}
+:root[data-lift='on'] :is(.btn__deck, .btn__leaf, .btn__rim, .btn__tooling) {
+  border-radius: 0 var(--b-r1) var(--b-r1) 0;
+}
+:root[data-lift='on'] .btn__tooling {
+  border-color: color-mix(in oklab, var(--book-foil) 34%, transparent);
+  box-shadow: none;
+}
+:root[data-lift='on'] .btn__label {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.01em; text-transform: none;
+  text-shadow: 0 1px 2px color-mix(in oklab, var(--b-shadow) 60%, transparent);
+}
+:root[data-lift='on'] .btn__sizer {
+  font-size: 12px; letter-spacing: 0.01em; text-transform: none;
+  padding: 0 1.05rem 0 calc(var(--book-spine-w) + 1.05rem);
+}
+:root[data-lift='on'] .btn__page-text { color: var(--b-sunken); }
+:root[data-lift='on'] .btn:focus-visible { outline: 2px solid var(--b-accent); outline-offset: 4px; }
+:root[data-lift='on'] .btn--sm { --book-h: 32px; --book-min-w: 100px; }
+:root[data-lift='on'] .btn--sm .btn__label,
+:root[data-lift='on'] .btn--sm .btn__sizer { font-size: 11px; }
+:root[data-lift='on'] .btn--primary .btn__cover {
+  background: linear-gradient(135deg,
+    var(--wine-700) 0%,
+    color-mix(in oklab, var(--wine-chosen) 46%, var(--steel-950)) 100%);
+}
+:root[data-lift='on'] .btn--stats .btn__cover {
+  background: linear-gradient(135deg,
+    var(--steel-800) 0%,
+    color-mix(in oklab, var(--steel-900) 58%, var(--steel-950)) 100%);
+}
+
+/* secondary actions are not books, and they were not buttons either: a
+   0.7rem uppercase word inside a 1px box. Now they are 34px controls with a
+   fill, a hover, a press and a hit area. */
+:root[data-lift='on'] .btn--pamphlet {
+  display: inline-flex; align-items: center;
+  height: var(--b-ctl-h);
+  padding: 0 0.9rem;
+  border: 1px solid var(--b-hair);
+  border-radius: var(--b-r2);
+  background: var(--b-s1);
+  color: var(--b-ink-dim);
+  transition: background-color var(--t-fast) var(--ease-settle),
+              color var(--t-fast) var(--ease-settle),
+              border-color var(--t-fast) var(--ease-settle);
+}
+:root[data-lift='on'] .btn--pamphlet .btn__flat {
+  font-family: var(--sans); font-size: var(--fs-small); font-weight: 600;
+  letter-spacing: -0.004em; text-transform: none;
+}
+:root[data-lift='on'] .btn--pamphlet:hover:not(:disabled) {
+  background: var(--b-s2);
+  border-color: var(--b-hair-hi);
+  color: var(--b-ink);
+}
+:root[data-lift='on'] .btn--pamphlet:active:not(:disabled) {
+  transform: none;
+  background: var(--b-s3);
+}
+:root[data-lift='on'] .btn--pamphlet.btn--sm { height: 1.875rem; padding: 0 0.75rem; }
+:root[data-lift='on'] .btn--pamphlet.btn--sm .btn__flat { font-size: var(--fs-micro); }
+:root[data-lift='on'] :is(.quote__foot, .composer) .btn--pamphlet {
+  color: var(--b-ink-dim);
+  border-color: var(--b-hair);
+}
+:root[data-lift='on'] :is(.quote__foot, .composer) .btn--pamphlet:hover {
+  color: var(--b-ink);
+  border-color: var(--b-hair-hi);
+}

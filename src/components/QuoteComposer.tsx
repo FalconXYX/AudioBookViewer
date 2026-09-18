@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Chapter } from '@/types'
 import type { NewQuote } from '@/hooks/useQuotes'
 import { formatTime } from '@/lib/format'
-import { TranscribeError, decodeClip, modelReady, transcribe } from '@/lib/transcribe'
+import { TranscribeError, decodeClip, modelReady, releaseDecodeCache, transcribe } from '@/lib/transcribe'
 import { BookButton } from './BookButton'
 
 interface Props {
@@ -37,6 +37,10 @@ export function QuoteComposer({
   const area = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => { area.current?.focus() }, [])
+  // The decode cache holds a whole chapter of PCM for the non-MP4 path. Keeping
+  // it alive after the dialog closes is how a long session ends up holding
+  // several hundred megabytes for nothing.
+  useEffect(() => releaseDecodeCache, [])
 
   const dur = chapter?.duration_sec ?? end
   const clamp = (v: number) => Math.min(Math.max(0, v), dur)

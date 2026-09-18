@@ -10,6 +10,7 @@ import { QuotesScreen } from './components/QuotesScreen'
 import { Stats } from './components/Stats'
 import { useAuth } from './hooks/useAuth'
 import { useLibrary } from './hooks/useLibrary'
+import { useLift } from './hooks/useLift'
 import { useQuotes } from './hooks/useQuotes'
 import { useSettings } from './hooks/useSettings'
 import { accessionNo } from './lib/paratext'
@@ -26,6 +27,7 @@ export default function App() {
   const library = useLibrary(auth.user)
   const settings = useSettings(auth.user)
   const quotes = useQuotes(auth.user)
+  const [lift, toggleLift] = useLift()
   const [view, setView] = useState<View>({ name: 'none' })
   const [query, setQuery] = useState('')
 
@@ -95,6 +97,8 @@ export default function App() {
         statsActive={view.name === 'stats'}
         onQuotes={() => setView(view.name === 'quotes' ? { name: 'none' } : { name: 'quotes' })}
         quotesActive={view.name === 'quotes'}
+        lift={lift}
+        onLift={toggleLift}
       />
 
       <Shelf
