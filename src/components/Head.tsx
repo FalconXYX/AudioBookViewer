@@ -1,5 +1,6 @@
 import type { BookWithProgress } from "@/hooks/useLibrary";
 import { BookButton } from "./BookButton";
+import { NavActions } from "./NavActions";
 import logoUrl from "../assets/logo.png";
 
 interface Props {
@@ -17,6 +18,10 @@ interface Props {
   simple?: boolean;
   onSimple?: () => void;
   onHome?: () => void;
+  /** On a phone the controls move into the shelf drawer; see NavActions. */
+  phone?: boolean;
+  drawerOpen?: boolean;
+  onMenu?: () => void;
 }
 const hours = (sec: number) => Math.round(sec / 3600);
 
@@ -35,6 +40,9 @@ export function Head({
   simple,
   onSimple,
   onHome,
+  phone,
+  drawerOpen,
+  onMenu,
 }: Props) {
   const total = books.reduce((n, b) => n + (b.total_duration_sec || 0), 0);
   const heard = books.reduce(
@@ -43,6 +51,23 @@ export function Head({
   );
   return (
     <header className="head">
+      {/* The shelf is off-canvas on a phone, so it needs a handle. Rendered
+          only there: on a desk the case is always visible and a button that
+          opened it would be a control with nothing to do. */}
+      {phone && (
+        <button
+          type="button"
+          className="head__menu"
+          aria-expanded={!!drawerOpen}
+          aria-controls="shelf-case"
+          onClick={onMenu}
+        >
+          <span className="head__menu-bars" aria-hidden="true" />
+          <span className="sr-only">
+            {drawerOpen ? "Close the shelf" : "Open the shelf"}
+          </span>
+        </button>
+      )}
       <div className="head__mark">
         <img src={logoUrl} alt="" className="head__logo" />
         <b>Audiobook Viewer</b>
@@ -67,56 +92,30 @@ export function Head({
         )}
       </div>
       <div className="head__right">
-        <label className="head__find">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" />
-          </svg>
-          <input
-            value={query}
-            onChange={(e) => onQuery(e.target.value)}
-            placeholder="Find a title or author"
-            aria-label="Find on the shelf"
-          />
-        </label>
-        {/* BookView portals its mini transport in here, so playback is reachable
-            from the shelf and the add-book flow, not only from BookView. */}
-        <div className="head__pill" id="head-transport" />
-        {onQuotes && (
-          <BookButton variant="quotes" size="sm" onClick={onQuotes}
-                      openLabel="Opening…" aria-pressed={quotesActive}>Quotes</BookButton>
-        )}
-        {onStats && (
-          <BookButton variant="stats" size="sm" onClick={onStats}
-                      openLabel="Opening…" aria-pressed={statsActive}>Statistics</BookButton>
-        )}
-        {/* role="switch" rather than a pressed button: this turns a mode on
-            and off, and a screen reader should say "on"/"off", not
-            "pressed". The label is a real element so it is both visible and
-            the accessible name, and the state is announced separately below
-            rather than being baked into the name — a name that changes as you
-            operate the control is disorienting. */}
-        {onSimple && (
-          <button
-            type="button"
-            className="simple-switch"
-            role="switch"
-            aria-checked={!!simple}
-            aria-keyshortcuts="l"
-            id="simple-mode-switch"
-            onClick={onSimple}
-          >
-            <span className="simple-switch__track" aria-hidden="true">
-              <span className="simple-switch__knob" />
-            </span>
-            <span className="simple-switch__label">Simple mode</span>
-          </button>
-        )}
-        <div className="head__acct">
-          <span title={email}>{email}</span>
-          <BookButton variant="pamphlet" size="sm" onClick={onSignOut}>
-            Sign out
-          </BookButton>
-        </div>
+        {phone
+          ? (
+            <>
+              {/* Playback and the commonplace book both stay in the head.
+                  Everything else moves into the drawer — but burying Quotes
+                  behind a hamburger made the one thing a phone is actually
+                  for look as though it had been taken away. */}
+              <div className="head__pill" id="head-transport" />
+              {onQuotes && (
+                <BookButton variant="quotes" size="sm" onClick={onQuotes}
+                            openLabel="Opening…" aria-pressed={quotesActive}>
+                  Quotes
+                </BookButton>
+              )}
+            </>
+          )
+          : (
+            <NavActions
+              query={query} onQuery={onQuery} email={email} onSignOut={onSignOut}
+              onStats={onStats} statsActive={statsActive}
+              onQuotes={onQuotes} quotesActive={quotesActive}
+              simple={simple} onSimple={onSimple}
+            />
+          )}
       </div>
     </header>
   );

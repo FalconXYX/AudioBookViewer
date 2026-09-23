@@ -1,5 +1,21 @@
 <!doctype html>
 <html lang="en">
-  <head><meta charset="UTF-8" /><title>Design preview</title></head>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- The same two lines index.html carries. Without the viewport meta a
+         phone-width screenshot is taken at desktop width and scaled, and
+         without data-simple every :root[data-simple] rule — which is the
+         whole of the phone block — fails to match. A preview that does not
+         set them is not previewing the app. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Design preview</title>
+    <script>
+      try {
+        document.documentElement.dataset.simple =
+          new URLSearchParams(location.search).get('simple')
+          ?? (localStorage.getItem('abv:simple') === 'on' ? 'on' : 'off');
+      } catch (e) { document.documentElement.dataset.simple = 'off'; }
+    </script>
+  </head>
   <body><div id="root"></div><script type="module" src="/src/preview.tsx"></script></body>
 </html>

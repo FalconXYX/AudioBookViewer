@@ -11,6 +11,8 @@ import { Head } from '@/components/Head'
 import { NowPlaying } from '@/components/NowPlaying'
 import { Footer } from '@/components/Footer'
 import { Shelf } from '@/components/Shelf'
+import { usePhoneLayout } from '@/hooks/usePhoneLayout'
+import { NavActions } from '@/components/NavActions'
 import { QuotesScreen } from '@/components/QuotesScreen'
 import { Stats } from '@/components/Stats'
 import type { ListeningDay, Quote } from '@/types'
@@ -99,8 +101,16 @@ const demoDays: ListeningDay[] = (() => {
   return out
 })()
 
+const drawerOpen = params.get('drawer') === '1'
+
 function Chrome({ children, openBook, shelf = books }:
   { children: React.ReactNode; openBook?: BookWithProgress; shelf?: BookWithProgress[] }) {
+  // The real hook, not a query parameter. The phone layout is decided in two
+  // places — this media query and the one at the head of section 17 in
+  // app.css — and if they ever disagree the shelf goes off-canvas with no
+  // button to bring it back. Previewing through the same hook the app uses is
+  // what makes that drift visible here instead of on a phone.
+  const isPhone = usePhoneLayout() || params.get('phone') === '1'
   return (
     <div className="shell">
       <Head
@@ -108,9 +118,17 @@ function Chrome({ children, openBook, shelf = books }:
         query="" onQuery={noop} email="parth@plato.so" onSignOut={noop}
         onStats={noop} onQuotes={noop}
         simple={document.documentElement.dataset.simple === 'on'} onSimple={noop}
+        phone={isPhone} drawerOpen={drawerOpen} onMenu={noop}
       />
       <Shelf books={shelf} loading={false} selectedId={openBook?.id ?? null} query=""
-             onSelect={noop} onAdd={noop} />
+             onSelect={noop} onAdd={noop}
+             open={isPhone && drawerOpen}
+             nav={isPhone ? (
+               <NavActions stacked query="" onQuery={noop} email="parth@plato.so"
+                 onSignOut={noop} onStats={noop} onQuotes={noop}
+                 simple={document.documentElement.dataset.simple === 'on'} onSimple={noop} />
+             ) : undefined} />
+      {isPhone && drawerOpen && <button type="button" className="case__scrim" />}
       <main className="desk">
         {children}
         <Footer />
@@ -232,6 +250,42 @@ const demoQuotes: Quote[] = [
     transcribed: false,
     created_at: '2026-09-13T10:00:00Z', updated_at: '2026-09-13T10:00:00Z',
   },
+  {
+    // A paper book. This is the shape the loose form has always written, and
+    // the one that used to render as "as quoted by The Left Hand of Darkness".
+    id: 'q5', user_id: 'u', book_id: null,
+    text: 'Light is the left hand of darkness, and darkness the right hand of light.',
+    note: null, author: 'Ursula K. Le Guin', quoted_author: 'The Left Hand of Darkness',
+    chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
+    transcribed: false,
+    created_at: '2026-09-12T10:00:00Z', updated_at: '2026-09-12T10:00:00Z',
+  },
+  {
+    // Three lines from one paper book, typed three slightly different ways.
+    // These used to sit in "From elsewhere" as three unrelated quotes.
+    id: 'q6', user_id: 'u', book_id: null,
+    text: 'The camera never blinks, which is the whole trouble with being looked at.',
+    note: null, author: 'John Green', quoted_author: 'Hollywood, Ending',
+    chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
+    transcribed: false,
+    created_at: '2026-09-19T10:00:00Z', updated_at: '2026-09-19T10:00:00Z',
+  },
+  {
+    id: 'q7', user_id: 'u', book_id: null,
+    text: 'Everyone gets an ending. Not everyone gets to pick the genre.',
+    note: 'For the epigraph.', author: 'john green', quoted_author: 'hollywood ending',
+    chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
+    transcribed: false,
+    created_at: '2026-09-20T10:00:00Z', updated_at: '2026-09-20T10:00:00Z',
+  },
+  {
+    id: 'q8', user_id: 'u', book_id: null,
+    text: 'You cannot edit your way out of having been there.',
+    note: null, author: 'John Green', quoted_author: 'Hollywood Ending',
+    chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
+    transcribed: false,
+    created_at: '2026-09-21T10:00:00Z', updated_at: '2026-09-21T10:00:00Z',
+  },
 ]
 
 const root = createRoot(document.getElementById('root')!)
@@ -247,8 +301,10 @@ root.render(
       /></Chrome>
   : view === 'quotes' ? <QuotesScreen
         books={books} quotes={demoQuotes} loading={false}
-        onAdd={async () => {}} onRemove={async () => {}}
+        onAdd={async () => demoQuotes[0]} onRemove={async () => {}}
+        onUpdate={async () => true}
         onOpenBook={noop} onClose={noop} demoAdding={params.get('add') === '1'}
+        phone={params.get('phone') === '1'}
       />
   : view === 'empty' ? <Chrome shelf={[]}><DayBook books={[]} onOpen={noop} onAdd={noop} /></Chrome>
   : view === 'btn'  ? <Chrome><Buttons /></Chrome>

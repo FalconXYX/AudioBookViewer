@@ -1583,6 +1583,170 @@ input::placeholder { color: var(--text-faint); }
 .composer__foot .btn--pamphlet:hover, .composer .btn--pamphlet:hover {
   color: var(--paper-ink); border-color: color-mix(in oklab, var(--paper-ink) 55%, transparent); }
 
+/* Looking a book up by the number on the back of it. The button sits on the
+   field's own line rather than under it, because it acts on that field and
+   nothing else, and because on a phone a row is one thumb-sweep. */
+.composer__lookup { display: flex; align-items: stretch; gap: var(--s-3); }
+.composer__lookup input { flex: 1 1 auto; min-width: 0; }
+.composer__lookup .btn { flex: none; align-self: stretch; }
+
+/* What came back, when more than one thing did. Open Library ranks
+   translations high, so the author and the year are not decoration here —
+   they are the only way to tell four editions apart. */
+.composer__choices { list-style: none; margin: var(--s-3) 0 0; padding: 0;
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--paper-ink) 22%, transparent);
+  overflow: hidden; }
+.composer__choices li + li {
+  border-top: 1px solid color-mix(in oklab, var(--paper-ink) 14%, transparent); }
+.composer__choices button {
+  display: block; width: 100%; padding: 0.5rem 0.7rem; border: 0; cursor: pointer;
+  background: color-mix(in oklab, var(--paper-ink) 5%, transparent);
+  font: inherit; color: var(--paper-ink); text-align: left;
+}
+.composer__choices button:hover, .composer__choices button:focus-visible {
+  background: color-mix(in oklab, var(--paper-red) 14%, transparent); }
+.composer__choices b { display: block; font-family: var(--serif);
+  font-size: var(--fs-body); font-weight: 600; }
+.composer__choices span { display: block; font-family: var(--mono);
+  font-size: var(--fs-micro); color: var(--paper-ink-2); }
+
+/* ---------- BROWSING THE COMMONPLACE BOOK --------------------------------
+   Two columns of what is actually in it — the books and the people — with
+   counts, laid out to be read down rather than hidden in a dropdown. A
+   dropdown makes you name the thing before it will help; this is for when
+   you want to look. */
+.browser { margin: 0 0 var(--s-6); }
+.browser__bar { display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--s-3) var(--s-4); margin-bottom: var(--s-4); }
+.browser__count { margin: 0; font-family: var(--mono); font-size: var(--fs-micro);
+  color: var(--ink-cool); }
+.browser__sort { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-left: auto; }
+.browser__sortbtn {
+  padding: 0.3rem 0.7rem; border-radius: var(--radius-pill); cursor: pointer;
+  border: 1px solid color-mix(in oklab, var(--gilt-blind) 40%, transparent);
+  background: color-mix(in oklab, var(--void) 35%, transparent);
+  font-family: var(--mono); font-size: var(--fs-micro); letter-spacing: 0.04em;
+  color: var(--text-dim);
+  transition: color var(--t-fast) var(--ease-open),
+              border-color var(--t-fast) var(--ease-open);
+}
+.browser__sortbtn:hover { color: var(--ink-gilt);
+  border-color: color-mix(in oklab, var(--gilt) 55%, transparent); }
+.browser__sortbtn[aria-pressed='true'] {
+  color: var(--void); background: var(--gilt);
+  border-color: var(--gilt); font-weight: 700;
+}
+.browser__toggle {
+  padding: 0.3rem 0.8rem; border-radius: var(--radius-pill); cursor: pointer;
+  border: 1px solid color-mix(in oklab, var(--gilt-blind) 40%, transparent);
+  background: none; font-family: var(--mono); font-size: var(--fs-micro);
+  color: var(--ink-gilt);
+}
+:root[data-simple='on'] .browser__toggle {
+  border-color: var(--b-hair); color: var(--b-accent-text); border-radius: var(--b-r2);
+}
+.browser__clear { border: 0; background: none; cursor: pointer; padding: 0.3rem 0;
+  font-family: var(--mono); font-size: var(--fs-micro); color: var(--ink-gilt);
+  text-decoration: underline; text-underline-offset: 3px; }
+
+.browser__facets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-5); }
+/* An author-level `display` outranks the UA sheet's `[hidden] { display: none }`,
+   so the attribute alone does nothing here. */
+.browser__facets[hidden] { display: none; }
+.browser__col h4 { margin: 0 0 var(--s-3); }
+.browser__empty { margin: 0; font-size: var(--fs-small); color: var(--text-faint); }
+.browser__list { list-style: none; margin: 0; padding: 0;
+  max-height: 13rem; overflow-y: auto; overscroll-behavior: contain; }
+.browser__item {
+  display: flex; align-items: baseline; gap: var(--s-3); width: 100%;
+  padding: 0.34rem 0.5rem; border: 0; border-radius: var(--r-sm);
+  background: none; cursor: pointer; text-align: left;
+  font-family: var(--serif); font-size: var(--fs-small); color: var(--text-dim);
+  transition: background-color var(--t-fast) var(--ease-open),
+              color var(--t-fast) var(--ease-open);
+}
+.browser__item:hover { background: color-mix(in oklab, var(--gilt) 10%, transparent);
+  color: var(--ink-gilt); }
+.browser__item[aria-pressed='true'] {
+  background: color-mix(in oklab, var(--gilt) 20%, transparent);
+  color: var(--ink-gilt); font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--gilt);
+}
+.browser__label { flex: 1 1 auto; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+.browser__n { flex: none; font-family: var(--mono); font-size: var(--fs-micro);
+  color: var(--text-faint); }
+.browser__item[aria-pressed='true'] .browser__n { color: var(--ink-gilt); }
+
+/* Simple mode paints these from its own family; the geometry above is shared. */
+:root[data-simple='on'] .browser__sortbtn {
+  border-color: var(--b-hair); background: var(--b-s2); color: var(--b-ink-dim);
+  border-radius: var(--b-r2);
+}
+:root[data-simple='on'] .browser__sortbtn[aria-pressed='true'] {
+  background: var(--b-accent); border-color: var(--b-accent); color: var(--b-s1);
+}
+:root[data-simple='on'] .browser__clear { color: var(--b-accent-text); }
+:root[data-simple='on'] .browser__item { border-radius: var(--b-r2); color: var(--b-ink-dim); }
+:root[data-simple='on'] .browser__item:hover {
+  background: var(--b-s2); color: var(--b-ink); }
+:root[data-simple='on'] .browser__item[aria-pressed='true'] {
+  background: var(--b-s3); color: var(--b-ink);
+  box-shadow: inset 2px 0 0 var(--b-accent); }
+:root[data-simple='on'] .browser__n { color: var(--b-ink-faint); }
+
+/* The names you have used before, shown rather than hidden behind a datalist
+   you have to guess at. A row of small labels on the paper, in the order they
+   were last used. */
+.namesug { display: flex; align-items: baseline; gap: var(--s-3);
+  margin-top: 0.45rem; flex-wrap: wrap; }
+.namesug__lead { flex: none; font-family: var(--mono); font-size: var(--fs-micro);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: color-mix(in oklab, var(--paper-ink) 52%, transparent); }
+.namesug__list { display: flex; flex-wrap: wrap; gap: 0.3rem;
+  list-style: none; margin: 0; padding: 0; }
+.namesug__chip {
+  padding: 0.24rem 0.55rem; border-radius: var(--radius-pill); cursor: pointer;
+  border: 1px solid color-mix(in oklab, var(--paper-ink) 26%, transparent);
+  background: color-mix(in oklab, var(--paper-ink) 5%, transparent);
+  font-family: var(--serif); font-size: var(--fs-small); color: var(--paper-ink-2);
+  transition: background-color var(--t-fast) var(--ease-open),
+              border-color var(--t-fast) var(--ease-open);
+}
+.namesug__chip:hover {
+  background: color-mix(in oklab, var(--paper-red) 12%, transparent);
+  border-color: color-mix(in oklab, var(--paper-ink) 50%, transparent);
+  color: var(--paper-ink);
+}
+/* The one already in the field, so confirming a prefilled name is one press
+   and you can see which it was. */
+.namesug__chip[aria-pressed='true'] {
+  background: color-mix(in oklab, var(--paper-red) 20%, transparent);
+  border-color: color-mix(in oklab, var(--paper-red) 55%, transparent);
+  color: var(--paper-ink); font-weight: 600;
+}
+.namesug__more { align-self: center; font-family: var(--mono);
+  font-size: var(--fs-micro);
+  color: color-mix(in oklab, var(--paper-ink) 46%, transparent); }
+
+/* Amending sits in the margin beside the quote, not over it: a commonplace
+   book is annotated in place. It takes the full width of the row it replaces
+   so the words keep the measure they had while being read. */
+.quote--amending { padding: 0; background: none; box-shadow: none; }
+/* The row stops being a quotation while it is being edited, so the printer's
+   opening mark goes with it — otherwise it hangs over the first field label. */
+.quote--amending::before { content: none; }
+.composer--amend { margin-bottom: 0; }
+
+/* The note at the back about how the book was made — where an absence is
+   explained, after the reading rather than before it. */
+.colophon-note { margin-top: var(--s-7); }
+.colophon-note p { margin: var(--s-3) 0 0; max-width: var(--measure);
+  font-family: var(--serif); font-size: var(--fs-small); line-height: 1.6;
+  color: var(--ink-cool); }
+
 /* the quote key sits apart from the transport proper: it makes a thing, it
    does not move the playhead */
 .tbtn--quote { margin-left: 0.35rem; }
@@ -2978,3 +3142,389 @@ input::placeholder { color: var(--text-faint); }
 :root[data-simple='on'] .btn__cover { animation: none; transition: none; }
 :root[data-simple='on'] .volume { transition: none; }
 :root[data-simple='on'] .volume:hover { translate: none; }
+
+/* ---------- 16b. THE NARROW DESK.  40rem .. 68rem ------------------------
+   Tablets and half-screen windows. The head has always needed about 1120px
+   to lay out and `.shell { overflow: hidden }` quietly clipped whatever did
+   not fit — which on an iPad in portrait meant Sign out and the mode switch
+   were off the edge and unreachable. Nothing here is a new layout; it is the
+   same bar with its least load-bearing parts standing down, in order: the
+   wordmark (the logo already says it), then the email, then the width of the
+   find field.
+
+   Must stay after the Simple-mode section and before the phone block; see
+   the note at the head of 17 for why source order decides these.
+   ------------------------------------------------------------------------ */
+@media (min-width: 40.0625rem) and (max-width: 68rem) {
+  :root[data-simple] .head { gap: var(--s-4); }
+  :root[data-simple] .head__mark b { display: none; }
+  :root[data-simple] .head__acct > span { display: none; }
+  /* Let the find field absorb the pressure rather than the bar overflowing:
+     without min-width:0 a flex input refuses to shrink past its content.
+     Scoped to .head — the quotes screen's search box carries .head__find too,
+     and an unscoped rule here squashed it to 8rem and clipped its placeholder
+     on a screen that had plenty of room. */
+  :root[data-simple] .head .head__find { flex: 0 1 auto; min-width: 0; }
+  :root[data-simple] .head .head__find input { width: 8rem; min-width: 3.5rem; }
+  :root[data-simple] .head__run i { display: none; }
+  /* 190px of cover beside the title inside a desk that is now ~420px wide
+     leaves nothing for the primary button, which then runs past the page. */
+  :root[data-simple] .title-board { grid-template-columns: minmax(0, 1fr); }
+  /* Scoped to the title board: .board-cover is also the thumbnail in the day
+     book's "Recently added" grid, where forcing a width pushes the last
+     column off the page. */
+  :root[data-simple] .title-board :is(.board-cover, .cover) {
+    width: min(170px, 30vw); height: auto; justify-self: start;
+  }
+  :root[data-simple] .head__right { gap: var(--s-3); }
+  /* The two screen buttons carry a 124px floor each (116 in Simple mode, and
+     100 on .btn--sm, which is set on the element and so has to be answered
+     there). At the bottom of this band that floor is the last 40px between
+     the bar fitting and Sign out going over the edge. */
+  :root[data-simple] .head { --book-min-w: 96px; }
+  :root[data-simple] .head .btn--sm { --book-min-w: 92px; }
+
+  /* Below roughly 730px the bar cannot hold everything on one line, and the
+     honest fix is a second line rather than dropping a control or stripping
+     the mode switch down to an unlabelled knob. The head stops being a fixed
+     row and sizes to its contents; wrapping only actually happens when it
+     has to, so nothing changes at the top of this band. */
+  :root[data-simple] .shell { grid-template-rows: auto minmax(0, 1fr); }
+  :root[data-simple] .head {
+    display: flex; flex-wrap: wrap; align-items: center;
+    min-height: var(--head-h); padding-block: 0.4rem; row-gap: 0.5rem;
+  }
+  :root[data-simple] .head__run { flex: 1 1 10rem; min-width: 0; }
+  :root[data-simple] .head__right { flex: 0 1 auto; margin-left: auto; }
+}
+
+/* ---------- 17. THE PHONE -------------------------------------------------
+   This block must stay LAST in this file. Its selectors are written
+   `:root[data-simple] X` — the bare attribute, not `[data-simple='on']` —
+   which has identical specificity to the Simple-mode selectors above and so
+   wins on source order alone. Move this block up and every rule in it
+   silently loses to Simple mode, with no error and no failing check.
+
+   The whole app ships to a phone. The one thing a phone browser genuinely
+   cannot do is open a folder of audio, and the two places that need one —
+   AddBook and SourceGate — already say so in their own words at the moment
+   it matters. Nothing else is withheld.
+
+   The shelf is the only structural change: 21rem standing beside the desk
+   leaves 22px for the page, so it goes off-canvas and the head grows a
+   handle. App.tsx drives that; usePhoneLayout repeats this same query.
+   ------------------------------------------------------------------------ */
+@media (max-width: 40rem), (max-height: 26rem) and (pointer: coarse) {
+
+  /* Geometry as tokens, so roughly three hundred Simple-mode rules re-scale
+     without being named. The two variants differ in colour, not in size. */
+  :root[data-simple] {
+    --head-h: 3.5rem;
+    --s-5: 1rem; --s-6: 1.15rem; --s-7: 1.25rem;
+    --b-gut: 0.9rem;
+    --b-ctl-h: 44px; --b-ctl-h-lg: 48px;
+    --book-h: 48px; --book-h-sm: 44px;
+    --apparatus-w: 100%;
+    --measure: 100%;
+  }
+  :root[data-simple] .btn--sm { --book-h: 44px; }
+
+  /* dvh, not vh: on iOS `vh` is the tallest the viewport ever gets, so a
+     100vh box puts its own foot under the browser toolbar. */
+  html, body, #root, .shell { height: 100dvh; }
+  body { overscroll-behavior-y: none; }
+
+  /* One column. The case is taken out of flow below, so the grid only has to
+     place the head and the desk. */
+  :root[data-simple] .shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "desk";
+  }
+
+  /* ---- the head: one compact row ----
+     Search, the two screens, the switch and the account move into the drawer
+     (see NavActions), so what is left is the handle, the mark, where you are,
+     and the transport — which has to stay reachable with the drawer shut. */
+  :root[data-simple] .head {
+    display: flex; align-items: center; gap: var(--s-3);
+    padding-left: max(0.6rem, env(safe-area-inset-left));
+    /* A book button's spine ornament runs to its own edge, so the Quotes
+       button needs a little more room on the right than the menu does on
+       the left or it sits flush against the screen. */
+    padding-right: max(0.85rem, env(safe-area-inset-right));
+  }
+  :root[data-simple] .head__mark b { display: none; }   /* the logo says it */
+  :root[data-simple] .head__run { flex: 1 1 auto; min-width: 0; }
+  :root[data-simple] .head__run b { overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; display: block; }
+  :root[data-simple] .head__run i { display: none; }
+  :root[data-simple] .head__right { flex: 0 0 auto; gap: 0; }
+
+  .head__menu {
+    flex: none; display: grid; place-items: center;
+    width: 44px; height: 44px; margin-left: -0.35rem;
+    border: 0; border-radius: var(--r-sm); background: none; cursor: pointer;
+  }
+  .head__menu-bars, .head__menu-bars::before, .head__menu-bars::after {
+    display: block; width: 19px; height: 2px; border-radius: 1px;
+    background: var(--ink-gilt); content: '';
+  }
+  .head__menu-bars { position: relative; }
+  .head__menu-bars::before { position: absolute; top: -6px; }
+  .head__menu-bars::after { position: absolute; top: 6px; }
+  .head__menu[aria-expanded='true'] { background: color-mix(in oklab, var(--void) 45%, transparent); }
+  :root[data-simple='on'] .head__menu-bars,
+  :root[data-simple='on'] .head__menu-bars::before,
+  :root[data-simple='on'] .head__menu-bars::after { background: var(--b-ink); }
+
+  /* ---- the shelf, off-canvas ----
+     A drawer rather than a column. It keeps its own scroll, and the search
+     and account controls ride at the bottom of it where a thumb reaches. */
+  :root[data-simple] .case {
+    position: fixed; z-index: var(--z-screen);
+    top: var(--head-h); bottom: 0; left: 0;
+    width: min(20rem, 86vw);
+    padding-bottom: env(safe-area-inset-bottom);
+    translate: -102% 0;                   /* 102%, so the shadow clears too */
+    transition: translate var(--t-med) var(--ease-open);
+    box-shadow: 8px 0 28px -8px var(--shadow);
+    overflow-y: auto; overscroll-behavior: contain;
+  }
+  :root[data-simple] .case[data-open='true'] { translate: 0 0; }
+  @media (prefers-reduced-motion: reduce) {
+    :root[data-simple] .case { transition: none; }
+  }
+  .case__scrim {
+    position: fixed; inset: var(--head-h) 0 0 0; z-index: var(--z-case);
+    border: 0; padding: 0; cursor: pointer;
+    background: color-mix(in oklab, var(--void) 62%, transparent);
+  }
+  /* The drawer's own footer: everything the head cannot hold at this width. */
+  .case__nav {
+    display: flex; flex-direction: column; align-items: stretch; gap: var(--s-3);
+    padding: var(--s-4) var(--s-4) calc(var(--s-4) + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+  }
+  .case__nav .head__find { width: 100%; }
+  .case__nav .head__find input { width: 100%; }
+  .case__nav .head__acct { display: flex; flex-direction: column;
+    align-items: stretch; gap: var(--s-3); margin-top: var(--s-2); }
+  .case__nav .head__acct > span { max-width: none; font-size: var(--fs-micro);
+    color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; }
+  .case__nav .simple-switch { align-self: flex-start; min-height: 44px; }
+
+  /* ---- the desk ---- */
+  :root[data-simple] .desk { padding-bottom: env(safe-area-inset-bottom); }
+  :root[data-simple] .page__inner { padding-inline: max(var(--s-4), env(safe-area-inset-left)); }
+
+  /* iOS zooms the page in on any field under 16px and never zooms back out.
+     Every field in this app is 15px or smaller. The two fields that carry a
+     Simple-mode font-size of their own need answering at matching
+     specificity — a bare :is() loses to `[data-simple='on'] .x input`. */
+  :root[data-simple] :is(input, textarea, select) { font-size: 16px; }
+  :root[data-simple] .rate select { font-size: 16px; }
+  :root[data-simple] :is(.composer__field, .composer__range) :is(input, textarea) {
+    font-size: 16px;
+  }
+
+  /* ---- the book page ---- */
+  /* 190px of cover next to the title leaves 96px for everything else. */
+  :root[data-simple] .title-board { grid-template-columns: minmax(0, 1fr); }
+  /* Scoped: .board-cover is also the day book's "Recently added" thumbnail,
+     which is sized by its own grid and must not be overridden here. */
+  :root[data-simple] .title-board :is(.board-cover, .cover) {
+    width: min(148px, 42vw); height: auto; justify-self: start;
+  }
+  :root[data-simple] .accession { width: auto; }
+  :root[data-simple] .plate__accession { flex-wrap: wrap; overflow-wrap: anywhere; }
+  :root[data-simple] .gauge__legend { flex-wrap: wrap; row-gap: 0.3rem; }
+  :root[data-simple] .gauge__legend .leader { display: none; }
+  :root[data-simple] .detail__head { gap: var(--s-5); }
+
+  /* The leaf's frame was 80px of padding around a 278px column. */
+  :root[data-simple] .spread { grid-template-columns: minmax(0, 1fr); }
+  :root[data-simple] .spread__page { padding: 14px 10px 18px 12px; }
+  :root[data-simple] .leaf { padding: var(--s-4) var(--s-3); }
+  /* A chapter title clipped to 62% of a narrow leaf is two words. Let it wrap
+     and give the row the height instead. */
+  :root[data-simple] .toc__t { max-width: none; white-space: normal;
+    overflow: visible; text-overflow: clip; }
+  :root[data-simple] .toc__row { min-height: 48px; padding-right: 2rem;
+    align-items: center; }
+  /* An 11×19px ribbon is not a touch target. Widening the button scales its
+     clip-path into a great grey flag, and a padded ::after does not work
+     either — a clip-path clips the element's pseudo-elements with it. So the
+     button becomes a plain transparent 28×44 target and the ribbon shape
+     moves to ::before, which the clip-path no longer touches. Kept narrower
+     than it is tall so it does not swallow taps meant for the row, which is
+     how the chapter is opened. */
+  :root[data-simple] .toc__mark {
+    top: 0; right: 0.25rem; width: 28px; height: 44px;
+    clip-path: none; background: none;
+  }
+  :root[data-simple] .toc__mark::before {
+    content: ''; position: absolute; top: 12px; left: 50%; translate: -50% 0;
+    width: 11px; height: 19px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%);
+    background: color-mix(in oklab, var(--paper-ink) 16%, transparent);
+    transition: background-color var(--t-fast) var(--ease-open);
+  }
+  :root[data-simple] .toc__mark[aria-pressed='true']::before { background: var(--paper-red); }
+  :root[data-simple='on'] .toc__mark::before {
+    background: color-mix(in oklab, var(--ivory-50) 14%, transparent);
+  }
+  :root[data-simple='on'] .toc__mark[aria-pressed='true']::before { background: var(--b-accent); }
+  /* The cumulative offset is the one thing here that is derived rather than
+     told — the gauge above already says where you are — so it yields its
+     4.6rem to the chapter title, which was clipping to two words. */
+  :root[data-simple] .toc__cum { display: none; }
+
+  /* ---- the transport ----
+     Seven studs plus gaps needed ~366px inside a 326px box. */
+  :root[data-simple] .transport { width: calc(100% - 1rem); padding-inline: 0.5rem;
+    bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+  :root[data-simple] .transport__row { flex-wrap: wrap; justify-content: center;
+    gap: 0.4rem; }
+  :root[data-simple] .tbtn { min-width: 44px; min-height: 44px; }
+  /* A 4px scrub handle cannot be dragged by a finger. */
+  :root[data-simple] .scrub { height: 44px; }
+  :root[data-simple] .scrub::-webkit-slider-thumb { width: 18px; height: 26px;
+    border-radius: 3px; }
+  :root[data-simple] .scrub::-moz-range-thumb { width: 18px; height: 26px;
+    border-radius: 3px; }
+  :root[data-simple] .rate select { min-height: 44px; }
+  /* The listening view is fixed to the large viewport, so its foot hides
+     under the iOS toolbar. */
+  :root[data-simple] .folio-view { inset: var(--head-h) 0 0 0; height: auto; bottom: 0; }
+
+  /* ---- the day book ---- */
+  /* The folio was absolutely positioned over a centred heading. */
+  :root[data-simple] .daybook__head .folio { position: static; display: block;
+    margin-bottom: var(--s-3); }
+  :root[data-simple] .pulled { grid-template-columns: 44px minmax(0, 1fr);
+    row-gap: 0.4rem; }
+  :root[data-simple] .pulled > :last-child { grid-column: 1 / -1; }
+
+  /* ---- statistics ---- */
+  :root[data-simple] .facts span { min-width: 0; }
+  :root[data-simple] .facts b { min-width: 0; overflow-wrap: anywhere; }
+  /* Four tracks needing 373px inside 326px. Stack the label over the bar. */
+  :root[data-simple] .meters li { grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 0.3rem; }
+  :root[data-simple] .meters li > :nth-child(2) { grid-column: 1 / -1; }
+  :root[data-simple] .meters__left { white-space: normal; overflow-wrap: anywhere; }
+  /* Five tabs will not sit on one 390px line, and wrapping them broke "By
+     day" across two. A scroller keeps them on one line and in one order,
+     which is what a row of tabs is for. */
+  :root[data-simple] .tabs {
+    flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
+    margin-inline: 0; scrollbar-width: none;
+  }
+  :root[data-simple] .tabs::-webkit-scrollbar { display: none; }
+  :root[data-simple] .tabs__tab { min-height: 44px; flex: none; white-space: nowrap; }
+
+  /* ---- add a book ---- */
+  :root[data-simple] .found__fields { grid-template-columns: minmax(0, 1fr); }
+  :root[data-simple] .addbook__inner { padding-inline: var(--s-4); }
+
+  /* ---- sign in ---- */
+  :root[data-simple] .scrim:has(.signin) { padding: var(--s-4); }
+
+  /* ---- the quotes screen ---- */
+  /* The implicit grid column is `auto`, so it sizes to the widest child's
+     min-content and every sibling stretches to match. minmax(0,1fr) pins it
+     to the screen and lets the contents wrap instead. */
+  :root[data-simple] .stats-screen {
+    inset: 0; height: 100dvh; grid-template-columns: minmax(0, 1fr);
+  }
+  :root[data-simple] .stats-screen__bar {
+    height: auto; flex-wrap: wrap; gap: var(--s-3);
+    padding-top: calc(env(safe-area-inset-top) + 0.5rem);
+    padding-bottom: 0.5rem;
+    padding-left: max(var(--s-5), env(safe-area-inset-left));
+    padding-right: max(var(--s-5), env(safe-area-inset-right));
+  }
+  :root[data-simple] .stats-screen__mark { flex: 1 1 auto; }
+  /* 22rem of min-width on a flex item is a hard floor: it defeats shrinking
+     outright, and it is why this bar ran off the side of the screen. */
+  :root[data-simple] .quotes__find { order: 2; flex: 1 1 100%; min-width: 0; margin: 0; }
+  :root[data-simple] .head__find { min-height: 44px; }
+  :root[data-simple] .head__find input { width: 100%; min-height: 44px; font-size: 16px; }
+  :root[data-simple] .stats-screen__body {
+    padding-left: max(var(--s-5), env(safe-area-inset-left));
+    padding-right: max(var(--s-5), env(safe-area-inset-right));
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+    overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  }
+
+  /* The capture bar, pinned where the thumb already is when the other hand is
+     holding a book open. Stretching the primary book button across it leaves
+     one wide spine along the foot of the screen. */
+  :root[data-simple] .quotes__head {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-head);
+    margin: 0; gap: var(--s-3);
+    padding: 0.6rem max(var(--s-5), env(safe-area-inset-left))
+             calc(0.6rem + env(safe-area-inset-bottom))
+             max(var(--s-5), env(safe-area-inset-right));
+    box-shadow: 0 -1px 0 var(--line), var(--shadow-lg);
+  }
+  /* The one thing the two variants genuinely disagree about: the surface. */
+  :root[data-simple='off'] .quotes__head { background: var(--bg-deep); }
+  :root[data-simple='on'] .quotes__head { background: var(--b-s1); }
+  :root[data-simple] .quotes__head .btn--primary { flex: 1 1 auto; }
+  :root[data-simple] .quotes__count { flex: 0 1 auto; }
+  :root[data-simple] .quotes__head:has(+ .composer--inline) { display: none; }
+
+  /* The sheet. Full-bleed, and the foot never scrolls away: Keep it stays a
+     thumb-width above the keyboard however long the quote runs. Targets
+     .composer--inline and never bare .composer, which would also catch the
+     sign-in card and the desktop capture dialog. */
+  :root[data-simple] .composer--inline {
+    margin-inline: calc(max(var(--s-5), env(safe-area-inset-left)) * -1);
+    border-radius: 0;
+    padding-left: max(var(--s-5), env(safe-area-inset-left));
+    padding-right: max(var(--s-5), env(safe-area-inset-right));
+  }
+  :root[data-simple] .composer--inline .composer__foot {
+    position: sticky; bottom: 0; z-index: 1;
+    margin-top: var(--s-5); padding-block: 0.6rem;
+    background: var(--paper-buff);
+    box-shadow: 0 -1px 0 color-mix(in oklab, var(--paper-ink) 16%, transparent);
+  }
+  :root[data-simple] .composer { width: auto; max-height: none; }
+  :root[data-simple] :is(.composer__foot, .composer__lookup) .btn { min-height: 44px; }
+  :root[data-simple] .composer__range label { width: auto; flex: 1 1 5rem; }
+
+  /* ---- touch targets and reading ---- */
+  /* Every pamphlet everywhere: they are the app's secondary control and at
+     ~30px tall none of them is a touch target. */
+  :root[data-simple] .btn--pamphlet { min-height: 44px; padding-inline: 0.75rem; }
+  /* The one way back out of an open book, and the chapter-run disclosure. */
+  :root[data-simple] .head__crumb { min-height: 44px; min-width: 44px;
+    padding-inline: 0.35rem; }
+  :root[data-simple] .leaf__runhead { min-height: 44px; }
+  :root[data-simple] .quote__foot { gap: var(--s-3); row-gap: 0.5rem; flex-wrap: wrap; }
+  :root[data-simple] .quotes__book { min-height: 44px; }
+  :root[data-simple] .namesug__chip { min-height: 36px; padding-inline: 0.7rem; }
+  /* Two facet columns will not fit; stack them and let each scroll. */
+  :root[data-simple] .browser__facets { grid-template-columns: minmax(0, 1fr); }
+  :root[data-simple] .browser__list { max-height: 11rem; }
+  :root[data-simple] .browser__item { min-height: 44px; align-items: center; }
+  :root[data-simple] .browser__sortbtn { min-height: 44px; padding-inline: 0.85rem; }
+  :root[data-simple] .browser__sort { margin-left: 0; width: 100%; }
+  :root[data-simple] .browser__toggle { min-height: 44px; width: 100%; }
+  :root[data-simple] .head__knob { width: 44px; height: 44px; }
+  :root[data-simple] .quote__text { font-size: 1.05rem; line-height: 1.5; }
+  /* On touch there is no hover, so the one way back out of an open book has
+     to look like a control at rest. */
+  :root[data-simple] .head__crumb { text-decoration: underline;
+    text-underline-offset: 3px; }
+  :root[data-simple] .quotes__book { text-decoration: underline;
+    text-underline-offset: 3px; }
+  /* A long unbroken title or folder name is the usual cause of a sideways
+     scroll on a narrow screen. */
+  :root[data-simple] :is(.quote__text, .quote__note, .quote__src, .toc__t,
+    .title-board__body h2, .plate__accession, .volume__t, .volume__a) {
+    overflow-wrap: anywhere;
+  }
+}

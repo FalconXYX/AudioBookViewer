@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { BookWithProgress } from '@/hooks/useLibrary'
 import { BookButton } from './BookButton'
 import { bindingFor, runOf, thicknessFor, type Run } from '@/lib/paratext'
@@ -9,15 +10,21 @@ interface Props {
   query: string
   onSelect: (bookId: string) => void
   onAdd: () => void
+  /** Off-canvas on a phone; the head's menu button drives this. */
+  open?: boolean
+  /** Search, the two screens and the account, which have no room in a phone
+      head and so live down here instead. Desktop passes nothing. */
+  nav?: ReactNode
 }
 const RUNS: Run[] = ['reading', 'unopened', 'finished']
 
-export function Shelf({ books, loading, selectedId, query, onSelect, onAdd }: Props) {
+export function Shelf({ books, loading, selectedId, query, onSelect, onAdd, open, nav }: Props) {
   const q = query.trim().toLowerCase()
   const shown = q ? books.filter((b) => b.title.toLowerCase().includes(q) ||
                                         (b.author ?? '').toLowerCase().includes(q)) : books
   return (
-    <nav className="case" aria-label="Bookshelf">
+    <nav className="case" id="shelf-case" aria-label="Bookshelf"
+         data-open={open ? 'true' : undefined}>
       <div className="case__drawer">
         {loading && <p className="case__empty">Opening the case…</p>}
         {!loading && books.length === 0 && (
@@ -59,6 +66,7 @@ export function Shelf({ books, loading, selectedId, query, onSelect, onAdd }: Pr
       <div className="case__foot">
         <BookButton block openLabel="Opening folder…" onClick={onAdd}>Add a book</BookButton>
       </div>
+      {nav && <div className="case__nav">{nav}</div>}
     </nav>
   )
 }

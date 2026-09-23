@@ -210,7 +210,11 @@ model Quote {
   /// Maintained by the touch_updated_at trigger, as elsewhere.
   updated_at DateTime @default(now()) @db.Timestamptz(6)
 
-  book Book? @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  /// SetNull, not Cascade: the audio can be re-added from disk in a minute,
+  /// but a quote exists nowhere else. A trigger stamps the book's title into
+  /// `quoted_author` first, so an orphaned quote still says where it came
+  /// from — see migration 20260921120000_quotes_outlive_books.
+  book Book? @relation(fields: [book_id], references: [id], onDelete: SetNull)
 
   @@index([user_id, created_at])
   @@index([book_id])

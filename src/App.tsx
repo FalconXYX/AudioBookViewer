@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AddBook } from './components/AddBook'
 import { BookView } from './components/BookView'
 import { DayBook } from './components/DayBook'
 import { Footer } from './components/Footer'
 import { Head } from './components/Head'
 import { Shelf } from './components/Shelf'
+import { NavActions } from './components/NavActions'
 import { SignIn } from './components/SignIn'
 import { QuotesScreen } from './components/QuotesScreen'
 import { Stats } from './components/Stats'
 import { useAuth } from './hooks/useAuth'
 import { useLibrary } from './hooks/useLibrary'
 import { useSimpleMode } from './hooks/useSimpleMode'
+import { usePhoneLayout } from './hooks/usePhoneLayout'
 import { useQuotes } from './hooks/useQuotes'
 import { useSettings } from './hooks/useSettings'
 import { accessionNo } from './lib/paratext'
@@ -30,6 +32,24 @@ export default function App() {
   const [simple, toggleSimple] = useSimpleMode()
   const [view, setView] = useState<View>({ name: 'none' })
   const [query, setQuery] = useState('')
+
+  // Everything works on a phone except opening a folder of audio, which no
+  // phone browser can do. So nothing is withheld: the shelf slides in from
+  // the side instead of standing beside the desk, and the two places that
+  // genuinely need a folder — AddBook and SourceGate — say so themselves.
+  const phone = usePhoneLayout()
+  const [drawer, setDrawer] = useState(false)
+
+  // Opening a book, or widening the window past the breakpoint, should not
+  // leave a drawer hanging over the page.
+  useEffect(() => { setDrawer(false) }, [view, phone])
+
+  useEffect(() => {
+    if (!drawer) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDrawer(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [drawer])
 
   if (auth.loading) {
     return <div className="empty"><p className="faint">Loading…</p></div>
@@ -98,6 +118,9 @@ export default function App() {
         quotesActive={view.name === 'quotes'}
         simple={simple}
         onSimple={toggleSimple}
+        phone={phone}
+        drawerOpen={drawer}
+        onMenu={() => setDrawer((d) => !d)}
       />
 
       {/* The switch changes the whole page at once. Without an announcement a
@@ -119,7 +142,29 @@ export default function App() {
             ? { name: 'none' }
             : { name: 'book', bookId })}
         onAdd={() => setView({ name: 'add' })}
+        open={phone && drawer}
+        nav={phone ? (
+          <NavActions
+            stacked
+            query={query} onQuery={setQuery}
+            email={auth.user.email}
+            onSignOut={() => void auth.signOut()}
+            onStats={() => setView(view.name === 'stats' ? { name: 'none' } : { name: 'stats' })}
+            statsActive={view.name === 'stats'}
+            onQuotes={() => setView(view.name === 'quotes' ? { name: 'none' } : { name: 'quotes' })}
+            quotesActive={view.name === 'quotes'}
+            simple={simple} onSimple={toggleSimple}
+          />
+        ) : undefined}
       />
+
+      {/* Tapping away from the drawer shuts it, which is what every drawer
+          does and what a thumb reaches for first. */}
+      {phone && drawer && (
+        <button type="button" className="case__scrim" onClick={() => setDrawer(false)}>
+          <span className="sr-only">Close the shelf</span>
+        </button>
+      )}
 
       <main className="desk">
         {library.error && <p className="alert" role="alert">{library.error}</p>}
@@ -144,6 +189,7 @@ export default function App() {
             quotes={quotes.quotes}
             onAddQuote={quotes.add}
             onRemoveQuote={quotes.remove}
+            onUpdateQuote={quotes.update}
             onSetCoverBlob={library.setCoverFromBlob}
             onSetCoverUrl={library.setCoverFromUrl}
             onDelete={(bookId) => {
@@ -177,6 +223,9 @@ export default function App() {
           loading={quotes.loading}
           onAdd={quotes.add}
           onRemove={quotes.remove}
+          onUpdate={quotes.update}
+          error={quotes.error}
+          phone={phone}
           onOpenBook={(bookId) => setView({ name: 'book', bookId })}
           onClose={() => setView({ name: 'none' })}
         />

@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react'
 import type { BookWithProgress } from '@/hooks/useLibrary'
 import type { NewQuote } from '@/hooks/useQuotes'
-import { searchQuotes } from '@/hooks/useQuotes'
+import { searchQuotes, useQuoteSuggestions } from '@/hooks/useQuotes'
+import type { SortOrder } from '@/lib/quoteGroups'
+import { applyFacets, facetsOf, groupQuotes } from '@/lib/quoteGroups'
 import type { Quote } from '@/types'
 import { BookButton } from './BookButton'
+import { QuoteBrowser } from './QuoteBrowser'
 import { QuoteList } from './QuoteList'
 import { LooseQuoteForm } from './LooseQuoteForm'
 import logoUrl from '../assets/logo.png'
@@ -12,20 +15,30 @@ interface Props {
   books: BookWithProgress[]
   quotes: Quote[]
   loading: boolean
-  onAdd: (q: NewQuote) => Promise<unknown>
-  onRemove: (id: string) => Promise<void>
+  onAdd: (q: NewQuote) => Promise<Quote | null>
+  onRemove: (id: string) => Promise<unknown>
+  onUpdate: (id: string, patch: Partial<NewQuote>) => Promise<boolean>
   onOpenBook: (bookId: string) => void
   onClose: () => void
+  /** Whatever last went wrong talking to the server, so it can be said aloud. */
+  error?: string | null
+  /** Narrow layout: shorter copy, and the composer is the whole screen. */
+  phone?: boolean
   /** Preview harness only: opens the add form so it can be looked at. */
   demoAdding?: boolean
 }
 
 /** All of it, one shelf per book plus everything that came from elsewhere. */
 export function QuotesScreen({
-  books, quotes, loading, onAdd, onRemove, onOpenBook, onClose, demoAdding,
+  books, quotes, loading, onAdd, onRemove, onUpdate, onOpenBook, onClose,
+  error, phone, demoAdding,
 }: Props) {
+  const { authors, sources } = useQuoteSuggestions(quotes, books)
   const [query, setQuery] = useState('')
   const [adding, setAdding] = useState(demoAdding ?? false)
+  const [bookKey, setBookKey] = useState<string | null>(null)
+  const [authorKey, setAuthorKey] = useState<string | null>(null)
+  const [order, setOrder] = useState<SortOrder>('newest')
 
   const titleOf = useMemo(() => {
     const m = new Map(books.map((b) => [b.id, b.title]))
@@ -34,28 +47,23 @@ export function QuotesScreen({
 
   const found = useMemo(() => searchQuotes(quotes, query, titleOf), [quotes, query, titleOf])
 
-  // Group by book, with the loose ones last. Books with nothing kept are left
-  // out entirely rather than listed as empty shelves.
-  const groups = useMemo(() => {
-    const byBook = new Map<string, Quote[]>()
-    const loose: Quote[] = []
-    for (const q of found) {
-      if (!q.book_id) { loose.push(q); continue }
-      const list = byBook.get(q.book_id) ?? []
-      list.push(q)
-      byBook.set(q.book_id, list)
-    }
-    const ordered = books
-      .filter((b) => byBook.has(b.id))
-      .map((b) => ({ id: b.id, title: b.title, quotes: byBook.get(b.id)! }))
-    // Quotes whose book has been deleted still belong to somebody.
-    for (const [id, list] of byBook) {
-      if (!books.some((b) => b.id === id)) {
-        ordered.push({ id, title: titleOf(id), quotes: list })
-      }
-    }
-    return { ordered, loose }
-  }, [found, books, titleOf])
+  // The books and the people actually present, counted, for browsing by.
+  // Built from every quote rather than from what is currently on screen, so
+  // the lists do not shrink out from under the reader as they narrow.
+  const facets = useMemo(() => facetsOf(quotes, titleOf), [quotes, titleOf])
+
+  const narrowed = useMemo(
+    () => applyFacets(found, titleOf, bookKey, authorKey),
+    [found, titleOf, bookKey, authorKey],
+  )
+
+  // One shelf per source, whether or not the shelf knows the book. Two lines
+  // from the same paperback belong under its title, not in a drawer marked
+  // "elsewhere" — see lib/quoteGroups.
+  const groups = useMemo(
+    () => groupQuotes(narrowed, titleOf, order),
+    [narrowed, titleOf, order],
+  )
 
   return (
     <div className="stats-screen">
@@ -78,39 +86,67 @@ export function QuotesScreen({
       <div className="stats-screen__body">
         <section className="stats-block">
           <div className="quotes__head">
+            {/* The browser below carries the running count; this only speaks
+                while there is nothing to count yet. */}
             <p className="quotes__count num">
-              {loading ? 'Reading your commonplace book…'
-                : `${found.length} of ${quotes.length} kept`}
+              {loading ? 'Reading your commonplace book…' : ''}
             </p>
             <BookButton variant="primary" openLabel="Opening…" onClick={() => setAdding(true)}>
-              Add a quote
+              {phone ? 'Keep a line' : 'Add a quote'}
             </BookButton>
           </div>
 
+          {error && <p className="alert" role="alert">{error}</p>}
+
           {adding && (
             <LooseQuoteForm
-              onSave={async (q) => { await onAdd(q); setAdding(false) }}
+              onSave={onAdd}
               onClose={() => setAdding(false)}
+              authors={authors}
+              sources={sources}
             />
           )}
 
           {!loading && !adding && quotes.length === 0 && (
-            <p className="quotes__empty">Nothing kept yet.</p>
+            <p className="quotes__empty">
+              Nothing kept yet.
+              {phone && ' Start with whatever is open in your other hand.'}
+            </p>
           )}
 
-          {!loading && quotes.length > 0 && found.length === 0 && (
-            <p className="quotes__empty">Nothing matches “{query}”.</p>
+          {!loading && quotes.length > 0 && !adding && (
+            <QuoteBrowser
+              books={facets.books} authors={facets.authors}
+              bookKey={bookKey} authorKey={authorKey}
+              onBook={setBookKey} onAuthor={setAuthorKey}
+              order={order} onOrder={setOrder}
+              showing={narrowed.length} total={quotes.length}
+              collapsible={phone}
+            />
           )}
 
-          {groups.ordered.map((g) => (
-            <div key={g.id} className="quotes__group">
+          {!loading && quotes.length > 0 && narrowed.length === 0 && (
+            <p className="quotes__empty">
+              {query ? `Nothing matches “${query}”.` : 'Nothing under that.'}
+            </p>
+          )}
+
+          {groups.sources.map((g) => (
+            <div key={g.key} className="quotes__group">
               <h3 className="sc sc--ruled">
-                <button type="button" className="quotes__book" onClick={() => onOpenBook(g.id)}>
+                {/* A shelf book opens; a paper one has nothing to open, so it
+                    narrows the page to itself instead. */}
+                <button
+                  type="button"
+                  className="quotes__book"
+                  onClick={() => (g.bookId ? onOpenBook(g.bookId) : setBookKey(g.key))}
+                >
                   {g.title}
                 </button>
                 <i className="num">{g.quotes.length}</i>
               </h3>
-              <QuoteList quotes={g.quotes} onRemove={onRemove} />
+              <QuoteList quotes={g.quotes} onRemove={onRemove} onUpdate={onUpdate}
+                         authors={authors} sources={sources} hideSource />
             </div>
           ))}
 
@@ -119,9 +155,11 @@ export function QuotesScreen({
               <h3 className="sc sc--ruled">
                 From elsewhere<i className="num">{groups.loose.length}</i>
               </h3>
-              <QuoteList quotes={groups.loose} onRemove={onRemove} />
+              <QuoteList quotes={groups.loose} onRemove={onRemove} onUpdate={onUpdate}
+                         authors={authors} sources={sources} />
             </div>
           )}
+
         </section>
       </div>
     </div>

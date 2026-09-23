@@ -33,6 +33,14 @@ const reducedMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /**
+ * A touchscreen. `hover: none` rather than `pointer: coarse`, so a laptop with
+ * a touchscreen and a trackpad keeps the flourish and only a device driven by
+ * fingers alone loses it.
+ */
+const touchOnly = () =>
+  typeof matchMedia === 'function' && matchMedia('(hover: none)').matches
+
+/**
  * A book. The spine is the left EDGE of the object and the cover is hinged on
  * it, so the two are one coherent thing seen from the front.
  *
@@ -60,7 +68,10 @@ export function BookButton({
     // nothing should sit between pressing a control and the result. A button
     // that takes 1.12s to do anything, with no interim feedback, is read as
     // broken by anyone who cannot see the cover turning.
-    if (variant === 'pamphlet' || reducedMotion() || simpleModeActive()) {
+    // And on a phone the cover sequence sits between the tap and the keyboard
+    // coming up, so capturing a line begins with 1.12s of nothing happening.
+    // The flourish is worth a moment at a desk; it is not worth that here.
+    if (variant === 'pamphlet' || reducedMotion() || simpleModeActive() || touchOnly()) {
       onClick?.(e)
       return
     }

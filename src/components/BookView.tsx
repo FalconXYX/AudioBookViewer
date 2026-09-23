@@ -12,7 +12,7 @@ import { useProgress } from '@/hooks/useProgress'
 import { formatDurationLong, formatTime } from '@/lib/format'
 import { stampDate } from '@/lib/paratext'
 import type { NewQuote } from '@/hooks/useQuotes'
-import { useBookQuotes } from '@/hooks/useQuotes'
+import { useBookQuotes, useQuoteSuggestions } from '@/hooks/useQuotes'
 import { Apparatus } from './Apparatus'
 import { BookButton } from './BookButton'
 import { ChapterList } from './ChapterList'
@@ -29,8 +29,9 @@ interface Props {
   autoplayNext: boolean
   /** Every quote the user owns; this view picks out and orders its own. */
   quotes: Quote[]
-  onAddQuote: (q: NewQuote) => Promise<unknown>
-  onRemoveQuote: (id: string) => Promise<void>
+  onAddQuote: (q: NewQuote) => Promise<Quote | null>
+  onRemoveQuote: (id: string) => Promise<unknown>
+  onUpdateQuote: (id: string, patch: Partial<NewQuote>) => Promise<boolean>
   onSetCoverBlob: (bookId: string, blob: Blob) => Promise<void>
   onSetCoverUrl: (bookId: string, url: string) => Promise<void>
   onDelete: (bookId: string) => void
@@ -38,7 +39,7 @@ interface Props {
 
 export function BookView({
   user, book, accession, autoplayNext, quotes, onAddQuote, onRemoveQuote,
-  onSetCoverBlob, onSetCoverUrl, onDelete,
+  onUpdateQuote, onSetCoverBlob, onSetCoverUrl, onDelete,
 }: Props) {
   const { chapters } = useChapters(book.id)
   const source = useBookSource(user, book, chapters)
@@ -115,6 +116,8 @@ export function BookView({
 
   // In the order they are said, which is not the order they were kept.
   const bookQuotes = useBookQuotes(quotes, book.id)
+  // Offered when amending: every name already used, plus this book's own.
+  const { authors: quoteAuthors } = useQuoteSuggestions(quotes, [book])
 
   const markedIdx = useMemo(
     () => new Set(bookmarks.bookmarks.map((m) => m.chapter_idx)),
@@ -210,6 +213,8 @@ export function BookView({
               void player.goToChapter(q.chapter_idx, from, true)
             }}
             onRemove={onRemoveQuote}
+            onUpdate={onUpdateQuote}
+            authors={quoteAuthors}
           />
 
           <p className="colophon">
@@ -217,7 +222,14 @@ export function BookView({
               variant="pamphlet"
               size="sm"
               onClick={() => {
-                if (confirm(`Remove “${book.title}” from your shelf? Your audio files are untouched.`)) {
+                // Say what actually happens to each thing. The audio is safe
+                // because it was never here; the quotes are safe because they
+                // are kept, re-filed under the book's name.
+                if (confirm(
+                  `Remove “${book.title}” from your shelf?\n\n`
+                  + 'Your audio files on disk are untouched, and any lines you kept '
+                  + 'from it stay in your quotes, filed under its title.',
+                )) {
                   onDelete(book.id)
                 }
               }}
@@ -275,6 +287,7 @@ export function BookView({
               }
             : null}
           onSave={onAddQuote}
+          authors={quoteAuthors}
           onClose={() => setQuoting(null)}
         />
       )}

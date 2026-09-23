@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
-import type { Chapter } from '@/types'
+import { useEffect, useId, useRef, useState } from 'react'
+import type { Chapter, Quote } from '@/types'
 import type { NewQuote } from '@/hooks/useQuotes'
 import { formatTime } from '@/lib/format'
 import { TranscribeError, decodeClip, modelReady, releaseDecodeCache, transcribe } from '@/lib/transcribe'
 import { BookButton } from './BookButton'
+import { NameSuggestions } from './NameSuggestions'
 
 interface Props {
   bookId: string | null
@@ -14,8 +15,11 @@ interface Props {
   at: number
   /** The chapter's audio file, when one is reachable. Null disables transcribing. */
   getFile: (() => Promise<File | null>) | null
-  onSave: (q: NewQuote) => Promise<unknown>
+  /** Resolves to the saved row, or null if it did not save. */
+  onSave: (q: NewQuote) => Promise<Quote | null>
   onClose: () => void
+  /** Names already used, offered back rather than retyped. */
+  authors?: string[]
 }
 
 /** How far back the window reaches by default: you notice a line just after it. */
@@ -23,6 +27,7 @@ export const LOOKBACK_SEC = 30
 
 export function QuoteComposer({
   bookId, bookAuthor, chapter, chapterIdx, at, getFile, onSave, onClose,
+  authors = [],
 }: Props) {
   const [start, setStart] = useState(Math.max(0, at - LOOKBACK_SEC))
   const [end, setEnd] = useState(at)
@@ -35,6 +40,7 @@ export function QuoteComposer({
   const [err, setErr] = useState<string | null>(null)
   const [fromMachine, setFromMachine] = useState(false)
   const area = useRef<HTMLTextAreaElement>(null)
+  const listId = useId()
 
   useEffect(() => { area.current?.focus() }, [])
   // The decode cache holds a whole chapter of PCM for the non-MP4 path. Keeping
@@ -72,20 +78,32 @@ export function QuoteComposer({
   const save = async () => {
     const body = text.trim()
     if (!body) { setErr('A quote needs some words.'); return }
+    setErr(null)
     setBusy('Saving…')
-    await onSave({
+    const saved = await onSave({
       book_id: bookId,
       text: body,
       note: note.trim() || null,
       author: author.trim() || null,
-      quoted_author: relaying && quotedBy.trim() ? quotedBy.trim() : null,
-      chapter_idx: bookId ? chapterIdx : null,
-      position_sec: bookId ? at : null,
-      clip_start_sec: bookId ? start : null,
-      clip_end_sec: bookId ? end : null,
+      // The field shows `quotedBy || bookAuthor`, so leaving the prefilled name
+      // untouched used to save nothing at all. Read the same fallback here.
+      quoted_author: relaying ? (quotedBy.trim() || bookAuthor || null) : null,
+      // Gate the audio columns on having a CHAPTER, not on having a book. A
+      // book without chapters is a paper one, and writing 0:00 to it would put
+      // a "Play from here" button on a paperback.
+      chapter_idx: chapter ? chapterIdx : null,
+      position_sec: chapter ? at : null,
+      clip_start_sec: chapter ? start : null,
+      clip_end_sec: chapter ? end : null,
       transcribed: fromMachine,
     })
     setBusy(null)
+    // Only leave if the words are actually somewhere else now. Closing on a
+    // failed insert threw away everything the reader had just typed.
+    if (!saved) {
+      setErr('That did not save. Your words are still here — try again.')
+      return
+    }
     onClose()
   }
 
@@ -139,8 +157,19 @@ export function QuoteComposer({
 
         <label className="composer__field">
           <span className="sc sc--cool">Said by</span>
-          <input value={author} onChange={(e) => setAuthor(e.target.value)}
+          {/* Most quotes are kept here rather than on the quotes screen, so
+              this is the field that decides whether a name fragments. Picking
+              an existing spelling is what keeps a new John Green quote with
+              the old ones; typing one anyway is fine, because useQuotes folds
+              it onto the spelling already on file. */}
+          <input value={author} list={`${listId}-a`}
+                 autoComplete="off" autoCapitalize="words" spellCheck={false}
+                 onChange={(e) => setAuthor(e.target.value)}
                  placeholder="Nobody credited" />
+          <datalist id={`${listId}-a`}>
+            {authors.map((a) => <option key={a} value={a} />)}
+          </datalist>
+          <NameSuggestions options={authors} value={author} onPick={setAuthor} />
         </label>
 
         <label className="composer__check">
@@ -152,7 +181,8 @@ export function QuoteComposer({
             {/* `author` is who said the words; this is who is passing them on,
                 so the attribution stays right way round on the quotes page. */}
             <span className="sc sc--cool">Relayed by</span>
-            <input value={quotedBy || bookAuthor || ''}
+            <input value={quotedBy || bookAuthor || ''} list={`${listId}-a`}
+                   autoComplete="off" autoCapitalize="words" spellCheck={false}
                    onChange={(e) => setQuotedBy(e.target.value)} />
           </label>
         )}
