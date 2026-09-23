@@ -5,7 +5,10 @@ import type {
   DeviceSource as PrismaDeviceSource,
   ListeningDay as PrismaListeningDay,
   Progress as PrismaProgress,
+  ModerationAction as PrismaModerationAction,
+  Profile as PrismaProfile,
   Quote as PrismaQuote,
+  SharedWork as PrismaSharedWork,
   UserSettings as PrismaUserSettings,
   SourceKind,
 } from '@prisma/client'
@@ -42,6 +45,24 @@ export type DeviceSource = Wire<PrismaDeviceSource>
 export type UserSettings = Wire<PrismaUserSettings>
 export type ListeningDay = Wire<PrismaListeningDay>
 export type Quote = Wire<PrismaQuote>
+export type Profile = Wire<PrismaProfile>
+export type SharedWork = Wire<PrismaSharedWork>
+export type ModerationAction = Wire<PrismaModerationAction>
+
+/**
+ * A quote as the world sees it, which is a strictly smaller thing than a
+ * Quote. This mirrors the `shared_quotes` view rather than the table: the
+ * note and the owner are not omitted here by convention, they are absent from
+ * the view itself and cannot be asked for.
+ */
+export interface SharedQuote {
+  id: string
+  work_key: string
+  text: string
+  author: string | null
+  quoted_author: string | null
+  created_at: string
+}
 
 /** A chapter as produced by scanning, before it has ids or an owner. */
 export type NewChapter = Omit<Chapter, 'id' | 'book_id' | 'user_id'>

@@ -3,8 +3,8 @@ import type { BookWithProgress } from '@/hooks/useLibrary'
 import type { NewQuote } from '@/hooks/useQuotes'
 import { searchQuotes, useQuoteSuggestions } from '@/hooks/useQuotes'
 import type { SortOrder } from '@/lib/quoteGroups'
-import { applyFacets, facetsOf, groupQuotes } from '@/lib/quoteGroups'
-import type { Quote } from '@/types'
+import { applyFacets, facetsOf, groupQuotes, sourceTitleOf } from '@/lib/quoteGroups'
+import type { Quote, SharedWork } from '@/types'
 import { BookButton } from './BookButton'
 import { QuoteBrowser } from './QuoteBrowser'
 import { QuoteList } from './QuoteList'
@@ -24,6 +24,8 @@ interface Props {
   error?: string | null
   /** Narrow layout: shorter copy, and the composer is the whole screen. */
   phone?: boolean
+  /** Books with a quote base, so a quote can be offered to one. */
+  works?: SharedWork[]
   /** Preview harness only: opens the add form so it can be looked at. */
   demoAdding?: boolean
 }
@@ -31,7 +33,7 @@ interface Props {
 /** All of it, one shelf per book plus everything that came from elsewhere. */
 export function QuotesScreen({
   books, quotes, loading, onAdd, onRemove, onUpdate, onOpenBook, onClose,
-  error, phone, demoAdding,
+  error, phone, works, demoAdding,
 }: Props) {
   const { authors, sources } = useQuoteSuggestions(quotes, books)
   const [query, setQuery] = useState('')
@@ -39,6 +41,16 @@ export function QuotesScreen({
   const [bookKey, setBookKey] = useState<string | null>(null)
   const [authorKey, setAuthorKey] = useState<string | null>(null)
   const [order, setOrder] = useState<SortOrder>('newest')
+  // Shut books, by key. A set of what is CLOSED rather than what is open, so
+  // a newly appearing book is open by default — the common case is wanting to
+  // read them, not having to unfold each one.
+  const [shut, setShut] = useState<ReadonlySet<string>>(new Set())
+
+  const toggle = (key: string) => setShut((prev) => {
+    const next = new Set(prev)
+    if (!next.delete(key)) next.add(key)
+    return next
+  })
 
   const titleOf = useMemo(() => {
     const m = new Map(books.map((b) => [b.id, b.title]))
@@ -131,35 +143,82 @@ export function QuotesScreen({
             </p>
           )}
 
-          {groups.sources.map((g) => (
-            <div key={g.key} className="quotes__group">
-              <h3 className="sc sc--ruled">
-                {/* A shelf book opens; a paper one has nothing to open, so it
-                    narrows the page to itself instead. */}
-                <button
-                  type="button"
-                  className="quotes__book"
-                  onClick={() => (g.bookId ? onOpenBook(g.bookId) : setBookKey(g.key))}
-                >
-                  {g.title}
-                </button>
-                <i className="num">{g.quotes.length}</i>
-              </h3>
-              <QuoteList quotes={g.quotes} onRemove={onRemove} onUpdate={onUpdate}
-                         authors={authors} sources={sources} hideSource />
-            </div>
-          ))}
+          {groups.sources.map((g) => {
+            const open = !shut.has(g.key)
+            return (
+              <div key={g.key} className="quotes__group">
+                <h3 className="sc sc--ruled">
+                  {/* The title folds the book shut. Opening the book itself
+                      moved to its own control beside the count — a heading
+                      that did both would have to guess which you meant. */}
+                  <button
+                    type="button"
+                    className="quotes__book"
+                    aria-expanded={open}
+                    aria-controls={`group-${g.key}`}
+                    onClick={() => toggle(g.key)}
+                  >
+                    <span className="quotes__caret" aria-hidden="true" />
+                    {g.title}
+                  </button>
+                  <i className="num">{g.quotes.length}</i>
+                  {g.bookId && (
+                    <button type="button" className="quotes__open"
+                            onClick={() => onOpenBook(g.bookId!)}>
+                      Open
+                    </button>
+                  )}
+                </h3>
+                {open && (
+                  <div id={`group-${g.key}`}>
+                    <QuoteList quotes={g.quotes} onRemove={onRemove} onUpdate={onUpdate}
+                               authors={authors} sources={sources} hideSource
+                               works={works} sourceTitleOf={(q) => sourceTitleOf(q, titleOf)} />
+                  </div>
+                )}
+              </div>
+            )
+          })}
 
-          {groups.loose.length > 0 && (
-            <div className="quotes__group">
-              <h3 className="sc sc--ruled">
-                From elsewhere<i className="num">{groups.loose.length}</i>
-              </h3>
-              <QuoteList quotes={groups.loose} onRemove={onRemove} onUpdate={onUpdate}
-                         authors={authors} sources={sources} />
+          {groups.loose.length > 0 && (() => {
+            const open = !shut.has('__loose')
+            return (
+              <div className="quotes__group">
+                <h3 className="sc sc--ruled">
+                  <button
+                    type="button"
+                    className="quotes__book"
+                    aria-expanded={open}
+                    aria-controls="group-loose"
+                    onClick={() => toggle('__loose')}
+                  >
+                    <span className="quotes__caret" aria-hidden="true" />
+                    From elsewhere
+                  </button>
+                  <i className="num">{groups.loose.length}</i>
+                </h3>
+                {open && (
+                  <div id="group-loose">
+                    <QuoteList quotes={groups.loose} onRemove={onRemove} onUpdate={onUpdate}
+                               authors={authors} sources={sources} />
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* An ending, so the list finishes rather than running off the
+              bottom edge. The asterism is the same mark the book page signs
+              off with. */}
+          {!loading && !adding && narrowed.length > 0 && (
+            <div className="quotes__foot">
+              <p className="colophon">
+                {narrowed.length === quotes.length
+                  ? <>That is the whole of it — <b>{quotes.length}</b> kept.</>
+                  : <>The end of what matches — <b>{narrowed.length}</b> of <b>{quotes.length}</b> kept.</>}
+              </p>
             </div>
           )}
-
         </section>
       </div>
     </div>

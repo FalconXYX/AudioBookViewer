@@ -9,6 +9,8 @@ interface Props {
   statsActive?: boolean
   onQuotes?: () => void
   quotesActive?: boolean
+  onBase?: () => void
+  baseActive?: boolean
   simple?: boolean
   onSimple?: () => void
   /** True in the phone drawer, where these stack instead of sitting in a row. */
@@ -25,7 +27,7 @@ interface Props {
  */
 export function NavActions({
   query, onQuery, email, onSignOut, onStats, statsActive,
-  onQuotes, quotesActive, simple, onSimple, stacked,
+  onQuotes, quotesActive, onBase, baseActive, simple, onSimple, stacked,
 }: Props) {
   return (
     <>
@@ -47,6 +49,10 @@ export function NavActions({
       {onQuotes && (
         <BookButton variant="quotes" size="sm" onClick={onQuotes}
                     openLabel="Opening…" aria-pressed={quotesActive}>Quotes</BookButton>
+      )}
+      {onBase && (
+        <BookButton variant="pamphlet" size="sm" onClick={onBase}
+                    aria-pressed={baseActive}>Quote base</BookButton>
       )}
       {onStats && (
         <BookButton variant="stats" size="sm" onClick={onStats}

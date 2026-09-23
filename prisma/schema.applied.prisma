@@ -59,6 +59,7 @@ model Book {
   bookmarks      Bookmark[]
   device_sources DeviceSource[]
   listening_days ListeningDay[]
+  quotes         Quote[]
 
   @@index([user_id])
   @@map("books")
@@ -67,18 +68,18 @@ model Book {
 /// One playable chapter. For a single file with embedded markers, every row
 /// shares file_name and differs by start_sec/end_sec.
 model Chapter {
-  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  book_id         String  @db.Uuid
-  user_id         String  @db.Uuid
+  id              String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  book_id         String @db.Uuid
+  user_id         String @db.Uuid
   idx             Int
   title           String
   /// Path relative to the book's folder root, e.g. "Part 1/01 - Opening.mp3".
   file_name       String
-  start_sec       Float   @default(0)
+  start_sec       Float  @default(0)
   end_sec         Float?
-  duration_sec    Float   @default(0)
+  duration_sec    Float  @default(0)
   /// Cumulative seconds of all preceding chapters, so "time left in book" is O(1).
-  book_offset_sec Float   @default(0)
+  book_offset_sec Float  @default(0)
 
   book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
 
@@ -171,4 +172,100 @@ model ListeningDay {
   @@id([user_id, book_id, day])
   @@index([user_id, day])
   @@map("listening_days")
+}
+
+/// A line worth keeping. Attached to a spot in a book when it was captured
+/// while listening, and free-standing when it was not — the app doubles as a
+/// commonplace book, so a quote with no audiobook behind it is a first-class
+/// row rather than an orphan.
+model Quote {
+  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// References auth.users(id); the foreign key is added in migration SQL.
+  user_id String  @db.Uuid
+  /// Null for a quote that came from anywhere but the shelf.
+  book_id String? @db.Uuid
+
+  text String
+  /// The user's own thought about it, kept apart from the quotation itself.
+  note String?
+
+  /// Who said it. Seeded from the book's author at capture time and stored on
+  /// the row, so editing or deleting the book cannot silently rewrite history.
+  author        String?
+  /// Set when the book's author is quoting somebody else: `author` stays the
+  /// person who said the words, this is who is relaying them.
+  quoted_author String?
+
+  /// Where it is said. Null on a free-standing quote.
+  chapter_idx    Int?
+  position_sec   Float?
+  /// The audio window it was taken from, so the clip can be replayed or
+  /// transcribed again without having to guess the bounds a second time.
+  clip_start_sec Float?
+  clip_end_sec   Float?
+  /// True when the text came out of the transcriber rather than the keyboard.
+  transcribed    Boolean @default(false)
+
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  /// Maintained by the touch_updated_at trigger, as elsewhere.
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  /// SetNull, not Cascade: the audio can be re-added from disk in a minute,
+  /// but a quote exists nowhere else. A trigger stamps the book's title into
+  /// `quoted_author` first, so an orphaned quote still says where it came
+  /// from — see migration 20260921120000_quotes_outlive_books.
+  book Book? @relation(fields: [book_id], references: [id], onDelete: SetNull)
+
+  /// 'private' or 'public'. Never flipped except by a deliberate action; see
+  /// migration 20260923120000_shared_quotes for the rules the database holds.
+  visibility String @default("private")
+  /// Open Library work key ("/works/OL45345712W"), and the only way two
+  /// readers holding the same paperback land on the same quote base. Must
+  /// name a work a moderator approved before the quote can be public.
+  work_key   String?
+  work       SharedWork? @relation(fields: [work_key], references: [work_key])
+
+  @@index([user_id, created_at])
+  @@index([book_id])
+  @@map("quotes")
+}
+
+/// Who may moderate. There is no RLS policy that writes `is_moderator`, by
+/// design — it is set by hand in the Supabase dashboard and nowhere else, so
+/// no client can grant it to itself.
+model Profile {
+  user_id      String   @id @db.Uuid
+  is_moderator Boolean  @default(false)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("profiles")
+}
+
+/// The books a quote base may be kept for. An allowlist, so the shared side
+/// is a set of books rather than a set of typos. Only moderators write here.
+model SharedWork {
+  /// Open Library's stable identifier, e.g. "/works/OL45345712W".
+  work_key    String   @id
+  title       String
+  author      String?
+  year        Int?
+  cover_id    Int?
+  /// The moderator who opened this book up.
+  approved_by String   @db.Uuid
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  quotes Quote[]
+
+  @@map("shared_works")
+}
+
+/// Every withdrawal, so moderation can be reviewed rather than just trusted.
+model ModerationAction {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quote_id     String   @db.Uuid
+  moderator_id String   @db.Uuid
+  reason       String?
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("moderation_actions")
 }

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import type { Chapter, Quote } from '@/types'
+import type { Chapter, Quote, SharedWork } from '@/types'
 import type { NewQuote } from '@/hooks/useQuotes'
 import { formatTime } from '@/lib/format'
 import { BookButton } from './BookButton'
 import { QuoteAmend } from './QuoteAmend'
+import { ShareControl } from './ShareControl'
 
 interface Props {
   quotes: Quote[]
@@ -21,6 +22,10 @@ interface Props {
   sources?: string[]
   /** True when a heading above already names the source, so it is not repeated. */
   hideSource?: boolean
+  /** Books with a quote base. Supplying these puts a Share control on a quote. */
+  works?: SharedWork[]
+  /** What each quote is filed under, for matching against those books. */
+  sourceTitleOf?: (q: Quote) => string | null
 }
 
 /**
@@ -30,7 +35,7 @@ interface Props {
  */
 export function QuoteList({
   quotes, chapters, heading, emptyNote, bookTitleOf, onGoTo, onRemove,
-  onUpdate, authors, sources, hideSource,
+  onUpdate, authors, sources, hideSource, works, sourceTitleOf,
 }: Props) {
   const [amending, setAmending] = useState<string | null>(null)
 
@@ -95,6 +100,13 @@ export function QuoteList({
                       <BookButton variant="pamphlet" size="sm" onClick={() => onGoTo(q)}>
                         Play from here
                       </BookButton>
+                    )}
+                    {works && works.length > 0 && onUpdate && (
+                      <ShareControl
+                        quote={q} works={works}
+                        sourceTitle={sourceTitleOf ? sourceTitleOf(q) : null}
+                        onUpdate={onUpdate}
+                      />
                     )}
                     {onUpdate && (
                       <BookButton variant="pamphlet" size="sm" onClick={() => setAmending(q.id)}>

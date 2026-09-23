@@ -8,12 +8,14 @@ import { Shelf } from './components/Shelf'
 import { NavActions } from './components/NavActions'
 import { SignIn } from './components/SignIn'
 import { QuotesScreen } from './components/QuotesScreen'
+import { QuoteBaseScreen } from './components/QuoteBaseScreen'
 import { Stats } from './components/Stats'
 import { useAuth } from './hooks/useAuth'
 import { useLibrary } from './hooks/useLibrary'
 import { useSimpleMode } from './hooks/useSimpleMode'
 import { usePhoneLayout } from './hooks/usePhoneLayout'
 import { useQuotes } from './hooks/useQuotes'
+import { useModerator, useSharedWorks } from './hooks/useSharing'
 import { useSettings } from './hooks/useSettings'
 import { accessionNo } from './lib/paratext'
 
@@ -22,6 +24,7 @@ type View =
   | { name: 'add' }
   | { name: 'stats' }
   | { name: 'quotes' }
+  | { name: 'base' }
   | { name: 'none' }
 
 export default function App() {
@@ -29,6 +32,10 @@ export default function App() {
   const library = useLibrary(auth.user)
   const settings = useSettings(auth.user)
   const quotes = useQuotes(auth.user)
+  // The shared half. `isModerator` decides what is SHOWN; every action it
+  // reveals is checked again on the server, where a forged client cannot go.
+  const isModerator = useModerator(auth.user)
+  const sharedWorks = useSharedWorks()
   const [simple, toggleSimple] = useSimpleMode()
   const [view, setView] = useState<View>({ name: 'none' })
   const [query, setQuery] = useState('')
@@ -116,6 +123,8 @@ export default function App() {
         statsActive={view.name === 'stats'}
         onQuotes={() => setView(view.name === 'quotes' ? { name: 'none' } : { name: 'quotes' })}
         quotesActive={view.name === 'quotes'}
+        onBase={() => setView(view.name === 'base' ? { name: 'none' } : { name: 'base' })}
+        baseActive={view.name === 'base'}
         simple={simple}
         onSimple={toggleSimple}
         phone={phone}
@@ -153,6 +162,8 @@ export default function App() {
             statsActive={view.name === 'stats'}
             onQuotes={() => setView(view.name === 'quotes' ? { name: 'none' } : { name: 'quotes' })}
             quotesActive={view.name === 'quotes'}
+            onBase={() => setView(view.name === 'base' ? { name: 'none' } : { name: 'base' })}
+            baseActive={view.name === 'base'}
             simple={simple} onSimple={toggleSimple}
           />
         ) : undefined}
@@ -226,7 +237,16 @@ export default function App() {
           onUpdate={quotes.update}
           error={quotes.error}
           phone={phone}
+          works={sharedWorks.works}
           onOpenBook={(bookId) => setView({ name: 'book', bookId })}
+          onClose={() => setView({ name: 'none' })}
+        />
+      )}
+
+      {view.name === 'base' && (
+        <QuoteBaseScreen
+          user={auth.user}
+          isModerator={isModerator}
           onClose={() => setView({ name: 'none' })}
         />
       )}

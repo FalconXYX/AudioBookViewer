@@ -16,6 +16,10 @@ export interface NewQuote {
   clip_start_sec?: number | null
   clip_end_sec?: number | null
   transcribed?: boolean
+  /** 'private' or 'public'. The database refuses 'public' without a work_key. */
+  visibility?: string
+  /** An approved Open Library work key; see migration 20260923120000. */
+  work_key?: string | null
 }
 
 export interface QuotesState {

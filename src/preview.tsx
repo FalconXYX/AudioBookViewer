@@ -14,6 +14,7 @@ import { Shelf } from '@/components/Shelf'
 import { usePhoneLayout } from '@/hooks/usePhoneLayout'
 import { NavActions } from '@/components/NavActions'
 import { QuotesScreen } from '@/components/QuotesScreen'
+import { QuoteBaseScreen } from '@/components/QuoteBaseScreen'
 import { Stats } from '@/components/Stats'
 import type { ListeningDay, Quote } from '@/types'
 import { Transport } from '@/components/Transport'
@@ -102,6 +103,15 @@ const demoDays: ListeningDay[] = (() => {
 })()
 
 const drawerOpen = params.get('drawer') === '1'
+
+const demoWorks = [
+  { work_key: '/works/OL45345712W', title: 'Hollywood, Ending', author: 'John Green',
+    year: 2026, cover_id: null, approved_by: 'u', created_at: '2026-09-22T10:00:00Z' },
+  { work_key: '/works/OL27479W', title: 'The Left Hand of Darkness', author: 'Ursula K. Le Guin',
+    year: 1969, cover_id: null, approved_by: 'u', created_at: '2026-09-20T10:00:00Z' },
+  { work_key: '/works/OL20600043W', title: 'Piranesi', author: 'Susanna Clarke',
+    year: 2020, cover_id: null, approved_by: 'u', created_at: '2026-09-18T10:00:00Z' },
+]
 
 function Chrome({ children, openBook, shelf = books }:
   { children: React.ReactNode; openBook?: BookWithProgress; shelf?: BookWithProgress[] }) {
@@ -224,6 +234,7 @@ const demoQuotes: Quote[] = [
     author: 'John Green', quoted_author: null,
     chapter_idx: 2, position_sec: 742, clip_start_sec: 712, clip_end_sec: 742,
     transcribed: true,
+    visibility: 'private', work_key: null,
     created_at: '2026-09-16T10:00:00Z', updated_at: '2026-09-16T10:00:00Z',
   },
   {
@@ -232,6 +243,7 @@ const demoQuotes: Quote[] = [
     note: null, author: 'Ursula K. Le Guin', quoted_author: 'John Green',
     chapter_idx: 4, position_sec: 128, clip_start_sec: 98, clip_end_sec: 128,
     transcribed: false,
+    visibility: 'private', work_key: null,
     created_at: '2026-09-15T10:00:00Z', updated_at: '2026-09-15T10:00:00Z',
   },
   {
@@ -240,6 +252,7 @@ const demoQuotes: Quote[] = [
     note: null, author: 'Susanna Clarke', quoted_author: null,
     chapter_idx: 0, position_sec: 61, clip_start_sec: 31, clip_end_sec: 61,
     transcribed: true,
+    visibility: 'private', work_key: null,
     created_at: '2026-09-14T10:00:00Z', updated_at: '2026-09-14T10:00:00Z',
   },
   {
@@ -248,6 +261,7 @@ const demoQuotes: Quote[] = [
     note: 'Overheard, not read.', author: 'Marilynne Robinson', quoted_author: 'a friend',
     chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
     transcribed: false,
+    visibility: 'private', work_key: null,
     created_at: '2026-09-13T10:00:00Z', updated_at: '2026-09-13T10:00:00Z',
   },
   {
@@ -258,6 +272,7 @@ const demoQuotes: Quote[] = [
     note: null, author: 'Ursula K. Le Guin', quoted_author: 'The Left Hand of Darkness',
     chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
     transcribed: false,
+    visibility: 'private', work_key: null,
     created_at: '2026-09-12T10:00:00Z', updated_at: '2026-09-12T10:00:00Z',
   },
   {
@@ -268,6 +283,7 @@ const demoQuotes: Quote[] = [
     note: null, author: 'John Green', quoted_author: 'Hollywood, Ending',
     chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
     transcribed: false,
+    visibility: 'private', work_key: null,
     created_at: '2026-09-19T10:00:00Z', updated_at: '2026-09-19T10:00:00Z',
   },
   {
@@ -276,6 +292,7 @@ const demoQuotes: Quote[] = [
     note: 'For the epigraph.', author: 'john green', quoted_author: 'hollywood ending',
     chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
     transcribed: false,
+    visibility: 'private', work_key: null,
     created_at: '2026-09-20T10:00:00Z', updated_at: '2026-09-20T10:00:00Z',
   },
   {
@@ -284,6 +301,7 @@ const demoQuotes: Quote[] = [
     note: null, author: 'John Green', quoted_author: 'Hollywood Ending',
     chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
     transcribed: false,
+    visibility: 'private', work_key: null,
     created_at: '2026-09-21T10:00:00Z', updated_at: '2026-09-21T10:00:00Z',
   },
 ]
@@ -305,6 +323,10 @@ root.render(
         onUpdate={async () => true}
         onOpenBook={noop} onClose={noop} demoAdding={params.get('add') === '1'}
         phone={params.get('phone') === '1'}
+      />
+  : view === 'base' ? <QuoteBaseScreen
+        user={{ id: 'u' } as never} isModerator={params.get('mod') === '1'} onClose={noop}
+        demoWorks={demoWorks} demoModerating={params.get('modon') === '1'}
       />
   : view === 'empty' ? <Chrome shelf={[]}><DayBook books={[]} onOpen={noop} onAdd={noop} /></Chrome>
   : view === 'btn'  ? <Chrome><Buttons /></Chrome>

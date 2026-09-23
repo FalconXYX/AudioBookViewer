@@ -15,6 +15,8 @@ interface Props {
   statsActive?: boolean;
   onQuotes?: () => void;
   quotesActive?: boolean;
+  onBase?: () => void;
+  baseActive?: boolean;
   simple?: boolean;
   onSimple?: () => void;
   onHome?: () => void;
@@ -37,6 +39,8 @@ export function Head({
   statsActive,
   onQuotes,
   quotesActive,
+  onBase,
+  baseActive,
   simple,
   onSimple,
   onHome,
@@ -113,6 +117,7 @@ export function Head({
               query={query} onQuery={onQuery} email={email} onSignOut={onSignOut}
               onStats={onStats} statsActive={statsActive}
               onQuotes={onQuotes} quotesActive={quotesActive}
+              onBase={onBase} baseActive={baseActive}
               simple={simple} onSimple={onSimple}
             />
           )}

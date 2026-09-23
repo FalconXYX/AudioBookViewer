@@ -21,7 +21,7 @@
  */
 
 /** Only the fields we use, so the reply stays small on a phone connection. */
-const FIELDS = 'title,author_name,first_publish_year,number_of_pages_median,cover_i,edition_count'
+const FIELDS = 'key,title,author_name,first_publish_year,number_of_pages_median,cover_i,edition_count'
 
 const ENDPOINT = 'https://openlibrary.org/search.json'
 
@@ -29,6 +29,13 @@ const ENDPOINT = 'https://openlibrary.org/search.json'
 const TIMEOUT_MS = 8000
 
 export interface FoundBook {
+  /**
+   * Open Library's work key, e.g. "/works/OL45345712W" — stable across
+   * editions and across people, and therefore the thing a shared quote base
+   * is keyed on. Two readers holding the same paperback arrive here
+   * independently; two readers typing its title do not.
+   */
+  workKey: string | null
   title: string
   author: string | null
   year: number | null
@@ -76,6 +83,7 @@ export function looksLikeIsbn(raw: string): boolean {
 }
 
 interface SearchDoc {
+  key?: string
   title?: string
   author_name?: string[]
   first_publish_year?: number
@@ -87,6 +95,7 @@ interface SearchDoc {
 function toFound(doc: SearchDoc): FoundBook | null {
   if (!doc.title) return null
   return {
+    workKey: doc.key ?? null,
     title: doc.title,
     author: doc.author_name?.[0] ?? null,
     year: doc.first_publish_year ?? null,

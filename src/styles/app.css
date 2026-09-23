@@ -1502,11 +1502,37 @@ input::placeholder { color: var(--text-faint); }
 .quotes__group .sc--ruled { margin-bottom: var(--s-3); }
 .quotes__group .sc--ruled i { font-style: normal; font-family: var(--mono);
   color: var(--gilt-lo); margin-left: 0.7rem; }
-.quotes__book { border: 0; background: none; padding: 0; cursor: pointer;
+.quotes__book { display: inline-flex; align-items: center; gap: 0.45rem;
+  border: 0; background: none; padding: 0; cursor: pointer;
   font: inherit; color: var(--ink-gilt); letter-spacing: inherit;
   text-transform: inherit; }
 .quotes__book:hover { color: var(--gilt-hi); text-decoration: underline;
   text-underline-offset: 3px; }
+
+/* The fold mark. A triangle rather than a chevron glyph, so it needs no font
+   and turns rather than swapping. */
+.quotes__caret {
+  flex: none; width: 0; height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  rotate: 90deg;
+  transition: rotate var(--t-fast) var(--ease-open);
+}
+.quotes__book[aria-expanded='false'] .quotes__caret { rotate: 0deg; }
+@media (prefers-reduced-motion: reduce) { .quotes__caret { transition: none; } }
+
+/* Opening the book is now its own control, because the heading folds. Quiet:
+   it is the rarer of the two things you want from a heading. */
+.quotes__open {
+  border: 0; background: none; padding: 0 0.2rem; cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-micro); letter-spacing: 0.06em;
+  color: var(--text-faint); text-transform: uppercase;
+}
+.quotes__open:hover { color: var(--ink-gilt); text-decoration: underline;
+  text-underline-offset: 3px; }
+:root[data-simple='on'] .quotes__open { color: var(--b-ink-faint); }
+:root[data-simple='on'] .quotes__open:hover { color: var(--b-accent-text); }
 .quotes__head { display: flex; align-items: center; gap: var(--s-4);
   margin-bottom: var(--s-5); }
 .quotes__count { flex: 1; font-family: var(--mono); font-size: var(--fs-micro);
@@ -1610,6 +1636,91 @@ input::placeholder { color: var(--text-faint); }
   font-size: var(--fs-body); font-weight: 600; }
 .composer__choices span { display: block; font-family: var(--mono);
   font-size: var(--fs-micro); color: var(--paper-ink-2); }
+
+/* The foot of the commonplace book.
+   
+   The list used to simply stop, which read as the page having been cut off.
+   The first two attempts at this were a fade — a wash of the page colour, and
+   then a blur — and both were wrong for the same reason: a quote sits on a
+   cream card with a hard edge, and softening what is INSIDE the card does
+   nothing about the edge itself, so it still ended mid-air and now looked
+   smeared as well. What was missing was never a gradient. It was an ending. */
+.quotes__foot { margin-top: var(--s-7); }
+.quotes__foot .colophon { margin-top: 0; }
+.quotes__foot .colophon b { font-style: normal; font-weight: 600;
+  color: var(--ink-gilt); }
+:root[data-simple='on'] .quotes__foot .colophon b { color: var(--b-ink); }
+
+/* ---------- THE SHARED QUOTE BASE ----------------------------------------
+   A public page per book. Nothing here is per-reader: the view it draws from
+   carries no owner and no note, so there is nothing to attribute and nothing
+   to hide. */
+/* Two fields side by side ON PAPER. Not `.found__fields` — that one is built
+   for the dark add-a-book surface and paints its inputs from `--void`, which
+   over the composer's cream composites to mud. */
+.composer__pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--s-4); margin-top: var(--s-4); }
+.composer__pair .composer__field { margin-bottom: 0; }
+.composer__pair + .btn { margin-top: var(--s-4); }
+
+.quotebase__spacer { flex: 1 1 auto; }
+.quotebase__by { margin: -0.4rem 0 var(--s-4); font-family: var(--serif);
+  font-style: italic; color: var(--text-dim); }
+
+.worklist { list-style: none; margin: var(--s-4) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--s-4); }
+.worklist__item {
+  display: flex; align-items: center; gap: var(--s-4); width: 100%;
+  padding: var(--s-3); border: 0; border-radius: var(--r-md); cursor: pointer;
+  background: color-mix(in oklab, var(--gilt) 7%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--gilt-blind) 34%, transparent);
+  text-align: left; color: var(--text);
+  transition: background-color var(--t-fast) var(--ease-open);
+}
+.worklist__item:hover { background: color-mix(in oklab, var(--gilt) 15%, transparent); }
+.worklist__item img, .worklist__blank {
+  flex: none; width: 44px; height: 66px; object-fit: cover; border-radius: 2px;
+  box-shadow: 0 4px 12px rgb(var(--shadow-rgb) / 0.4);
+}
+/* A book with no cover art is still a book, so the placeholder is a blank
+   binding rather than a hole — `--bg-sunken` is a cool slate and read as a
+   navy chip sitting on a wine card. */
+.worklist__blank {
+  background: linear-gradient(90deg,
+    color-mix(in oklab, var(--leather-edge, var(--void)) 82%, transparent) 0 4px,
+    color-mix(in oklab, var(--leather-face, var(--void)) 70%, transparent) 4px);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--gilt-blind) 30%, transparent),
+    0 4px 12px rgb(var(--shadow-rgb) / 0.4);
+}
+:root[data-simple='on'] .worklist__blank {
+  background: var(--b-s3);
+  box-shadow: inset 0 0 0 1px var(--b-hair);
+}
+.worklist__body { display: grid; gap: 0.15rem; min-width: 0; }
+.worklist__body b { font-family: var(--serif); font-size: var(--fs-lead);
+  color: var(--ink-gilt); overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+.worklist__body span { font-family: var(--mono); font-size: var(--fs-micro);
+  color: var(--text-dim); }
+
+/* Sharing one line, and taking it back. Sits in the quote's foot among the
+   other quiet machinery, because it is a property of the quote and not an
+   announcement. */
+.share { display: inline-flex; align-items: center; gap: var(--s-3); }
+.share__state { font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper-red); }
+.share__note, .share__err { font-family: var(--mono); font-size: var(--fs-micro);
+  color: var(--paper-ink-2); }
+.share__err { color: var(--paper-red); }
+
+:root[data-simple='on'] .worklist__item {
+  background: var(--b-s2); border-radius: var(--b-r2);
+  box-shadow: inset 0 0 0 1px var(--b-hair); }
+:root[data-simple='on'] .worklist__item:hover { background: var(--b-s3); }
+:root[data-simple='on'] .worklist__body b { color: var(--b-ink); }
+:root[data-simple='on'] .worklist__body span { color: var(--b-ink-dim); }
+:root[data-simple='on'] .share__state { color: var(--b-accent-text); }
 
 /* ---------- BROWSING THE COMMONPLACE BOOK --------------------------------
    Two columns of what is actually in it — the books and the people — with
@@ -3453,7 +3564,7 @@ input::placeholder { color: var(--text-faint); }
   :root[data-simple] .stats-screen__body {
     padding-left: max(var(--s-5), env(safe-area-inset-left));
     padding-right: max(var(--s-5), env(safe-area-inset-right));
-    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
     overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   }
 
@@ -3505,6 +3616,14 @@ input::placeholder { color: var(--text-faint); }
   :root[data-simple] .leaf__runhead { min-height: 44px; }
   :root[data-simple] .quote__foot { gap: var(--s-3); row-gap: 0.5rem; flex-wrap: wrap; }
   :root[data-simple] .quotes__book { min-height: 44px; }
+  /* The fold heading and the Open beside it are both real targets now. */
+  :root[data-simple] .quotes__open { min-height: 44px; padding-inline: 0.6rem; }
+  /* A bigger caret to match a bigger heading — 5px is a desk-sized mark. */
+  :root[data-simple] .quotes__caret { border-left-width: 7px;
+    border-top-width: 5px; border-bottom-width: 5px; }
+  /* Every switch, not only the one in the drawer: the Moderating switch in
+     the quote base header is the same control in a different bar. */
+  :root[data-simple] .simple-switch { min-height: 44px; }
   :root[data-simple] .namesug__chip { min-height: 36px; padding-inline: 0.7rem; }
   /* Two facet columns will not fit; stack them and let each scroll. */
   :root[data-simple] .browser__facets { grid-template-columns: minmax(0, 1fr); }
@@ -3513,6 +3632,9 @@ input::placeholder { color: var(--text-faint); }
   :root[data-simple] .browser__sortbtn { min-height: 44px; padding-inline: 0.85rem; }
   :root[data-simple] .browser__sort { margin-left: 0; width: 100%; }
   :root[data-simple] .browser__toggle { min-height: 44px; width: 100%; }
+  :root[data-simple] .worklist { grid-template-columns: minmax(0, 1fr); }
+  :root[data-simple] .worklist__item { min-height: 44px; }
+  :root[data-simple] .share { flex-wrap: wrap; }
   :root[data-simple] .head__knob { width: 44px; height: 44px; }
   :root[data-simple] .quote__text { font-size: 1.05rem; line-height: 1.5; }
   /* On touch there is no hover, so the one way back out of an open book has
