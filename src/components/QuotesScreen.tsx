@@ -199,8 +199,12 @@ export function QuotesScreen({
                 </h3>
                 {open && (
                   <div id="group-loose">
+                    {/* These name no source, so nothing can be matched for
+                        them — but they are often the very lines a reader
+                        wanted to share, so the picker is still offered. */}
                     <QuoteList quotes={groups.loose} onRemove={onRemove} onUpdate={onUpdate}
-                               authors={authors} sources={sources} />
+                               authors={authors} sources={sources}
+                               works={works} sourceTitleOf={() => null} />
                   </div>
                 )}
               </div>

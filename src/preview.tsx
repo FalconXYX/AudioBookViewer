@@ -14,6 +14,7 @@ import { Shelf } from '@/components/Shelf'
 import { usePhoneLayout } from '@/hooks/usePhoneLayout'
 import { NavActions } from '@/components/NavActions'
 import { QuotesScreen } from '@/components/QuotesScreen'
+import { QuoteList } from '@/components/QuoteList'
 import { QuoteBaseScreen } from '@/components/QuoteBaseScreen'
 import { Stats } from '@/components/Stats'
 import type { ListeningDay, Quote } from '@/types'
@@ -190,6 +191,16 @@ function Page() {
           <Apparatus book={book} chapters={chapters}
             accession={null} chapterIdx={2} />
         </div>
+        {/* The same list BookView renders, with the same props, so the share
+            control on a book page can be looked at here. */}
+        <QuoteList
+          quotes={demoQuotes.filter((q) => q.book_id === book.id)}
+          chapters={chapters}
+          heading="Quotes from this book"
+          emptyNote="Nothing kept from this book yet."
+          onRemove={async () => {}} onUpdate={async () => true}
+          hideSource works={demoWorks} sourceTitleOf={() => book.title}
+        />
         <p className="colophon">
           <BookButton variant="pamphlet" size="sm">Remove from shelf</BookButton>
         </p>
@@ -283,7 +294,8 @@ const demoQuotes: Quote[] = [
     note: null, author: 'John Green', quoted_author: 'Hollywood, Ending',
     chapter_idx: null, position_sec: null, clip_start_sec: null, clip_end_sec: null,
     transcribed: false,
-    visibility: 'private', work_key: null,
+    // One already on the book's public page, so that state can be looked at.
+    visibility: 'public', work_key: '/works/OL45345712W',
     created_at: '2026-09-19T10:00:00Z', updated_at: '2026-09-19T10:00:00Z',
   },
   {
@@ -323,6 +335,7 @@ root.render(
         onUpdate={async () => true}
         onOpenBook={noop} onClose={noop} demoAdding={params.get('add') === '1'}
         phone={params.get('phone') === '1'}
+        works={demoWorks}
       />
   : view === 'base' ? <QuoteBaseScreen
         user={{ id: 'u' } as never} isModerator={params.get('mod') === '1'} onClose={noop}

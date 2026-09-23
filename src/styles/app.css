@@ -1707,7 +1707,43 @@ input::placeholder { color: var(--text-faint); }
 /* Sharing one line, and taking it back. Sits in the quote's foot among the
    other quiet machinery, because it is a property of the quote and not an
    announcement. */
-.share { display: inline-flex; align-items: center; gap: var(--s-3); }
+/* Opening the picker makes this span the whole foot, so the controls stay
+   where they were rather than sliding to the left edge. */
+.share { display: inline-flex; align-items: center; gap: var(--s-3);
+  flex-wrap: wrap; justify-content: flex-end; }
+/* While the picker is open this takes the whole foot, and `order` sends it
+   below Amend and Remove — which stay on the row where the reader left them
+   instead of being pushed under a panel they did not open. It stacks, because
+   a flex line is broken on a child's CLAMPED width: a panel with a maximum
+   keeps fitting beside the button that opened it, however wide its basis. */
+.share--picking { flex: 1 0 100%; order: 1; min-width: 0;
+  flex-direction: column; align-items: flex-end; }
+/* Choosing a book to share to. It drops below the controls, because a list of
+   book titles cannot sit in a row of small buttons without pushing them off
+   the edge. No max-width here: a flex item's line break is decided after its
+   maximum is applied, so capping the panel puts it back on the buttons' row.
+   The measure is held here instead: a readable width, under the control that
+   opened it, and the whole foot on a narrow screen. */
+.share__pick { width: min(34rem, 100%); padding: var(--s-4);
+  display: flex; flex-direction: column; gap: var(--s-3);
+  border: 1px solid color-mix(in oklab, var(--paper-ink) 20%, transparent);
+  border-radius: var(--r-sm);
+  background: color-mix(in oklab, var(--paper-ink) 5%, transparent); }
+.share__hint { max-width: 62ch; font-family: var(--sans);
+  font-size: var(--fs-micro); line-height: 1.55; color: var(--paper-ink-2); }
+.share__hint b { font-weight: 600; color: var(--paper-ink); }
+.share__list { display: flex; flex-direction: column; gap: var(--s-2); }
+.share__list button { display: flex; flex-direction: column; gap: 1px;
+  min-height: 44px; padding: var(--s-3) var(--s-4); text-align: left;
+  cursor: pointer; font-family: var(--sans);
+  border: 1px solid color-mix(in oklab, var(--paper-ink) 22%, transparent);
+  border-radius: var(--r-sm); background: var(--paper); color: var(--paper-ink); }
+.share__list button:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--paper-ink) 9%, transparent); }
+.share__list button:disabled { opacity: 0.55; cursor: default; }
+.share__list b { font-size: var(--fs-micro); font-weight: 600; }
+.share__list span { font-family: var(--mono); font-size: var(--fs-micro);
+  color: var(--paper-ink-2); }
 .share__state { font-family: var(--mono); font-size: var(--fs-micro);
   letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper-red); }
 .share__note, .share__err { font-family: var(--mono); font-size: var(--fs-micro);
@@ -1721,6 +1757,15 @@ input::placeholder { color: var(--text-faint); }
 :root[data-simple='on'] .worklist__body b { color: var(--b-ink); }
 :root[data-simple='on'] .worklist__body span { color: var(--b-ink-dim); }
 :root[data-simple='on'] .share__state { color: var(--b-accent-text); }
+:root[data-simple='on'] .share__pick { background: var(--b-s2);
+  border-color: var(--b-hair); border-radius: var(--b-r2); }
+:root[data-simple='on'] .share__hint { color: var(--b-ink-dim); }
+:root[data-simple='on'] .share__hint b { color: var(--b-ink); }
+:root[data-simple='on'] .share__list button { background: var(--b-s3);
+  border-color: var(--b-hair); border-radius: var(--b-r2); color: var(--b-ink); }
+:root[data-simple='on'] .share__list button:hover:not(:disabled) {
+  background: var(--b-s4); }
+:root[data-simple='on'] .share__list span { color: var(--b-ink-dim); }
 
 /* ---------- BROWSING THE COMMONPLACE BOOK --------------------------------
    Two columns of what is actually in it — the books and the people — with

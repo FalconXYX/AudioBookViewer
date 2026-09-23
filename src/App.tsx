@@ -201,6 +201,7 @@ export default function App() {
             onAddQuote={quotes.add}
             onRemoveQuote={quotes.remove}
             onUpdateQuote={quotes.update}
+            works={sharedWorks.works}
             onSetCoverBlob={library.setCoverFromBlob}
             onSetCoverUrl={library.setCoverFromUrl}
             onDelete={(bookId) => {

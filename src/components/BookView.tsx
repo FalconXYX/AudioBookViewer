@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { User } from '@supabase/supabase-js'
 import type { BookWithProgress } from '@/hooks/useLibrary'
-import type { Quote } from '@/types'
+import type { Quote, SharedWork } from '@/types'
 import { useBookSource } from '@/hooks/useBookSource'
 import { useBookmarks } from '@/hooks/useBookmarks'
 import { useChapters } from '@/hooks/useChapters'
@@ -35,11 +35,13 @@ interface Props {
   onSetCoverBlob: (bookId: string, blob: Blob) => Promise<void>
   onSetCoverUrl: (bookId: string, url: string) => Promise<void>
   onDelete: (bookId: string) => void
+  /** Books with a quote base, so a line can be shared from where it was kept. */
+  works?: SharedWork[]
 }
 
 export function BookView({
   user, book, accession, autoplayNext, quotes, onAddQuote, onRemoveQuote,
-  onUpdateQuote, onSetCoverBlob, onSetCoverUrl, onDelete,
+  onUpdateQuote, onSetCoverBlob, onSetCoverUrl, onDelete, works,
 }: Props) {
   const { chapters } = useChapters(book.id)
   const source = useBookSource(user, book, chapters)
@@ -215,6 +217,9 @@ export function BookView({
             onRemove={onRemoveQuote}
             onUpdate={onUpdateQuote}
             authors={quoteAuthors}
+            hideSource
+            works={works}
+            sourceTitleOf={() => book.title}
           />
 
           <p className="colophon">
